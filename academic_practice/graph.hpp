@@ -163,7 +163,7 @@ public:
     mutable std::vector<std::vector<Weight_t>> m_Weightfunc;
             std::set<wedge>                    m_Edges;
     // [NOTE]: strict order by wedge::operator<
-    // [TODO]: or multimap to find by keys (weight)??
+    // [TODO]: or multimap to find by keys (weight) its useful for MST??
 };
 
 
