@@ -11,7 +11,10 @@
 
 
 struct edge_base_ {
-    using vert = int;
+    // +---------------------------------------------------------+
+    /* | */ using vert = int;                                 // |
+    // +---------------------------------------------------------+
+
 
     edge_base_(vert* Vs, vert* Vt) : sou(Vs), tar(Vt) {}
 
@@ -48,7 +51,7 @@ struct Graph_base_ {
 
     void add_n_verts (int Count) noexcept {
         assert(Count > 0 &&
-               Count <= std::numeric_limits<int>::max() - this->size() &&
+               Count <= std::numeric_limits<int>::max() - this->sizeV() &&
                "Invalid Value: Count");
         int startNo = 1 + m_Verts.size();
         Construct_verts(Count, startNo);
@@ -65,7 +68,7 @@ struct Graph_base_ {
         }
     }
 
-    int size() const noexcept { return (int)m_Verts.size(); }
+    int sizeV() const noexcept { return (int)m_Verts.size(); }
 
 private:
     void Construct_verts (int Count, int startNo = 1) noexcept { // [TODO]: is there a better way?
@@ -92,6 +95,9 @@ struct edge : edge_base_ {
     ~edge() {
         wei = Weight_t {0};
     }
+
+    vert* source() noexcept { return Mybase::sou; }
+    vert* targer() noexcept { return Mybase::tar; }
 
     bool operator== (const edge& Rhs) const noexcept {
         return (Mybase::tar == Rhs.tar) * (Mybase::sou == Rhs.sou) * (wei == Rhs.wei);
@@ -142,13 +148,18 @@ struct weighted_graph : Graph_base_ {
         Construct_edges();
     }
 
-    // weighted_graph& operator= (const weighted_graph& Rhs) = default;
+    // [WARNING]: shallow copy only provided!
+    weighted_graph (const weighted_graph& Rhs) : Graph_base_(Rhs.m_Verts), m_Edges(Rhs.m_Edges) {}
+
+    int sizeE() const noexcept {
+        return (int)m_Edges.size();
+    }
 
 private:
     // construct edges by weight function
     void Construct_edges() noexcept {
-        for (int i {0}; i < Mybase::size(); ++i) {
-            for (int j {i + 1}; j < Mybase::size(); ++j) {
+        for (int i {0}; i < Mybase::sizeV(); ++i) {
+            for (int j {i + 1}; j < Mybase::sizeV(); ++j) {
                 weight_type weight = m_Weightfunc[i][j];
                 if (weight) { // verts i and j are connected
                     m_Edges.emplace(m_Verts[i-1], m_Verts[j-1], weight);
