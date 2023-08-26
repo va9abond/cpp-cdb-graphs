@@ -17,58 +17,59 @@
 #include <set>
 #include <utility>
 #include "graph.hpp"
+#include "dsf.hpp"
 
 
-template <
-    class Graph_t
->
-inline void BFSvoid (const Graph_t& Graph, int Vstart = 1) {
-    std::queue<int> Queue;
-    std::set<int> Visited;
-
-    Queue.push(Vstart);
-    Visited.insert(Vstart);
-
-    while (!Queue.empty())
-    {
-        int Vnow = Queue.front();
-        const std::vector<int>& Neighbours = Graph[Vnow];
-
-        for (int Vnext {1}; Vnext <= Neighbours.size(); ++Vnext)
-        {
-            if (Neighbours[Vnext - 1]) { // Vnow connected with Vnext
-                if (Visited.find(Vnext) != Visited.end()) {
-                    Visited.insert(Vnext);
-                    Queue.push(Vnext);
-                }
-            }
-        }
-        Queue.pop();
-    }
-}
-
-
-template <
-    class Graph_t
->
-inline void DFSvoid (
-    const Graph_t& Graph,
-    int Vnow, // [TODO]: Vnow is Visited.front() always??
-    std::set<int>& Visited
-) {
-    // std::set<int> Visited;
-    const std::vector<int>& Neighbours = Graph[Vnow];
-
-    for (int Vnext {1}; Vnext <= Neighbours.size(); ++Vnext) {
-       if (Neighbours[Vnext - 1]) { // Vnow connected with Vnex
-            if (Visited.find(Vnext) != Visited.end()) {
-                // Vnext doesn't be visited before
-                Visited.insert(Vnext);
-                DFS(Graph, Vnext, Visited);
-            }
-        }
-    }
-}
+// template <
+//     class Graph_t
+// >
+// inline void BFSvoid (const Graph_t& Graph, int Vstart = 1) {
+//     std::queue<int> Queue;
+//     std::set<int> Visited;
+//
+//     Queue.push(Vstart);
+//     Visited.insert(Vstart);
+//
+//     while (!Queue.empty())
+//     {
+//         int Vnow = Queue.front();
+//         const std::vector<int>& Neighbours = Graph[Vnow];
+//
+//         for (int Vnext {1}; Vnext <= Neighbours.size(); ++Vnext)
+//         {
+//             if (Neighbours[Vnext - 1]) { // Vnow connected with Vnext
+//                 if (Visited.find(Vnext) != Visited.end()) {
+//                     Visited.insert(Vnext);
+//                     Queue.push(Vnext);
+//                 }
+//             }
+//         }
+//         Queue.pop();
+//     }
+// }
+//
+//
+// template <
+//     class Graph_t
+// >
+// inline void DFSvoid (
+//     const Graph_t& Graph,
+//     int Vnow, // [TODO]: Vnow is Visited.front() always??
+//     std::set<int>& Visited
+// ) {
+//     // std::set<int> Visited;
+//     const std::vector<int>& Neighbours = Graph[Vnow];
+//
+//     for (int Vnext {1}; Vnext <= Neighbours.size(); ++Vnext) {
+//        if (Neighbours[Vnext - 1]) { // Vnow connected with Vnex
+//             if (Visited.find(Vnext) != Visited.end()) {
+//                 // Vnext doesn't be visited before
+//                 Visited.insert(Vnext);
+//                 DFS(Graph, Vnext, Visited);
+//             }
+//         }
+//     }
+// }
 
 
 // [pseudocode]: generate Minimal Spannig Tree
@@ -92,11 +93,37 @@ inline void DFSvoid (
     // }
 // }
 
-enum MST_base_algorithm {
+enum MST_Algo_t {
     Prim,
     Kruskal
 };
 
+template <
+    MST_Algo_t algo_t
+>
+inline weighted_graph<int> generateMST (weighted_graph<int>& Graph);
+
+template <>
+inline weighted_graph<int> generateMST<Kruskal> (weighted_graph<int>& Graph) {
+    weighted_graph<int> Result(Graph.sizeV());
+    // dsf dsf_verts (Graph.m_Verts);
+    dsf dsf_verts(Graph.sizeV());
+    for (int i = 0; i < Graph.sizeV(); ++i) {
+        dsf_verts.make_set(Graph.m_Verts[i]);
+    }
+
+    for (auto Eit = Graph.m_Edges.begin(); Eit != Graph.m_Edges.end(); ++Eit) {
+        vert* V = (*Eit).sou;
+        vert* U = (*Eit).tar;
+        if (dsf_verts.find_set(V) != dsf_verts.find_set(U)) {
+            dsf_verts.unite_sets(V,U);
+            Result.m_Verts.push_back(U);
+            Result.m_Verts.push_back(V);
+            Result.m_Edges.insert(*Eit);
+        }
+    }
+    return Result;
+}
 
 
 #endif // GRAPHALGO_HPP
