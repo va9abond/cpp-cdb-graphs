@@ -19,7 +19,9 @@ struct dsf { // disjoint-set union
 
     // [WARNING]: Count shoud equals m_Verts.size() else
     //            make_set can cause segmentation error
-    dsf (int Count) : parents(Count) {}
+    dsf (int Count) : parents(Count), sizes(Count, 1) {}
+
+    dsf (const std::vector<vert*>& verts) : parents(verts), sizes(verts.size(), 1) {}
 
     ~dsf() {
         parents.clear();
