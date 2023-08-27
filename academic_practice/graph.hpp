@@ -98,7 +98,7 @@ struct Graph_base_ {
         assert(Count >= 0 &&
                Count <= std::numeric_limits<int>::max() - this->sizeV() &&
                "Invalid Value: Count");
-        int startNo = 1 + m_Verts.size();
+        int startNo = m_Verts.size();
         // std::cout << "\nStartNo: " << startNo << "\n"; // (c)
         Construct_verts(Count, startNo);
     }
@@ -110,17 +110,19 @@ struct Graph_base_ {
         // [NOTE]: does it really work? (= yes, valgrind approves)
         // [TODO]: is there a better way?
         for (auto Vit = m_Verts.begin(); Vit != m_Verts.end(); ++Vit) {
-            delete *Vit;
+            if (*Vit != nullptr) {
+                delete *Vit;
+                *Vit = nullptr;
+            }
         }
     }
 
     int sizeV() const noexcept { return (int)m_Verts.size(); }
 
 private:
-    void Construct_verts (int Count, int startNo = 1) noexcept { // [TODO]: is there a better way?
+    void Construct_verts (int Count, int startNo = 0) noexcept {
         for (int i {0}; i < Count; ++i) {
-            vert* Vnew = new vert(startNo + i);
-            m_Verts.push_back(Vnew);
+            m_Verts.push_back(new vert(startNo + i));
         }
     }
 
@@ -182,7 +184,6 @@ public:
     mutable std::vector<std::vector<Weight_t>> m_Weightfunc;
             std::set<wedge>                    m_Edges;
     // [NOTE]: strict order by wedge::operator<
-    // [TODO]: or multimap to find by keys (weight) its useful for MST??
 };
 
 
