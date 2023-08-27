@@ -101,10 +101,10 @@ enum MST_Algo_t {
 template <
     MST_Algo_t algo_t
 >
-inline weighted_graph<int> generateMST (weighted_graph<int>& Graph);
+inline weighted_graph<int> generateMST (const weighted_graph<int>& Graph);
 
 template <>
-inline weighted_graph<int> generateMST<Kruskal> (weighted_graph<int>& Graph) {
+inline weighted_graph<int> generateMST<Kruskal> (const weighted_graph<int>& Graph) {
     weighted_graph<int> Result(Graph.sizeV());
     // dsf dsf_verts (Graph.m_Verts);
     dsf dsf_verts(Graph.sizeV());

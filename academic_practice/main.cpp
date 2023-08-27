@@ -1,11 +1,9 @@
 #include <iostream>
 #include <vector>
-// #include "graph.hpp"
-// #include "graph_algo.hpp"
-
-
 #include <limits>
 #include <set>
+#include "graph.hpp"
+#include "graph_algo.hpp"
 
 
 template<
@@ -21,11 +19,13 @@ void print (const _Container_t<_Value_t>& Cont) {
 }
 
 enum color { black, green, yellow };
+// enum MST_Algo_t { Prim, Kruskal };
 
 int main() {
-    // weighted_graph<int> graph { "graph.txt" };
-    // for (const std::vector<int> &vec : graph.m_Matrix) {
-        // print(vec);
+    // weighted_graph<int> graph { "weight_func.txt" };
+    // std::vector<std::vector<int>> vvi = generate_2dvector_from_file("weight_func.txt");
+    // for (const std::vector<int> &vi : vvi) {
+        // print(vi);
     // }
 
     // std::set Visited = {std::make_pair<int,int>(12, 41), std::make_pair<int,int>(42,21)};
@@ -56,18 +56,18 @@ int main() {
     // std::set<int*>::size_type b = {23};
     // std::cout << a > b;
 
-    std::set<int*> myset;
-    myset.insert(new int{42});
-    myset.insert(new int{112});
-    myset.insert(new int{93});
-    myset.insert(new int{9248});
-    myset.insert(new int{11});
-
-    std::cout << **myset.begin() << "\n";
-
-    for (auto* val : myset) {
-        std::cout << *val << " ";
-    }
+    // std::set<int*> myset;
+    // myset.insert(new int{42});
+    // myset.insert(new int{112});
+    // myset.insert(new int{93});
+    // myset.insert(new int{9248});
+    // myset.insert(new int{11});
+    //
+    // std::cout << **myset.begin() << "\n";
+    //
+    // for (auto* val : myset) {
+    //     std::cout << *val << " ";
+    // }
 
     // for (auto Vit = myset.begin(); Vit != myset.end(); ++Vit) {
     //     delete *Vit;
@@ -76,14 +76,14 @@ int main() {
     // myset.clear();
     // std::cout << "\n" << myset.size();
 
-    for (auto Vit = myset.begin(); Vit != myset.end(); ) {
-        int** pptr = const_cast<int**>(&(*(Vit++)));
-        delete *pptr;
-    }
-    std::cout << "\n";
-    for (auto* val : myset) {
-        std::cout << *val << " ";
-    }
+    // for (auto Vit = myset.begin(); Vit != myset.end(); ) {
+    //     int** pptr = const_cast<int**>(&(*(Vit++)));
+    //     delete *pptr;
+    // }
+    // std::cout << "\n";
+    // for (auto* val : myset) {
+    //     std::cout << *val << " ";
+    // }
 
 
     // for (int* val : myset) {
@@ -94,6 +94,13 @@ int main() {
     // while (itt != myset.end()) {
         // delete *itt;
     // }
+
+
+    weighted_graph<int> Graph ("weight_func.txt");
+    print(Graph);
+
+    auto MST = generateMST<Kruskal>(Graph);
+    print(MST);
 
     return 0;
 }

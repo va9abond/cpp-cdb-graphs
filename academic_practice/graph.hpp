@@ -2,9 +2,10 @@
 #define GRAPH_HPP
 
 
-#include "vector_utils.hpp"
+#include <iostream>
 #include <cassert>
 #include <limits>
+#include "vector_utils.hpp"
 
 // [TODO]: different ways to store graph
 // [TODO]: tree is derived class from Grap_base_ with static_assert(is_tree);
@@ -23,12 +24,54 @@ struct edge_base_ {
         tar = nullptr;
     }
 
-    edge_base_ (const edge_base_&)            = delete;
-    edge_base_& operator= (const edge_base_&) = delete;
+    // edge_base_ (const edge_base_&)            = delete;
+    // edge_base_& operator= (const edge_base_&) = delete;
 
 
     vert* sou; // source vertice
-    vert* tar; // targer vertice
+    vert* tar; // target vertice
+};
+
+
+template <
+    class Weight_t
+>
+struct edge : edge_base_ {
+    using Mybase = edge_base_;
+    using vert   = Mybase::vert;
+
+    edge (vert* Vs, vert* Vt, Weight_t Weight) : edge_base_(Vs, Vt), wei(Weight) {}
+
+    ~edge() {
+        wei = Weight_t {0};
+    }
+
+    vert* source() noexcept { return Mybase::sou; }
+    vert* target() noexcept { return Mybase::tar; }
+
+    bool operator== (const edge& Rhs) const noexcept {
+        return (Mybase::tar == Rhs.tar) * (Mybase::sou == Rhs.sou) * (wei == Rhs.wei);
+    }
+
+    // if weigths is equal, then random
+    bool operator< (const edge& Rhs) const noexcept {
+        return (wei != Rhs.wei ? wei < Rhs.wei : true);
+    }
+
+    bool operator<= (const edge& Rhs) const noexcept {
+        return (*this < Rhs) + (*this == Rhs);
+    }
+
+    bool operator> (const edge& Rhs) const noexcept {
+        return !(*this < Rhs);
+    }
+
+    bool operator>= (const edge& Rhs) const noexcept {
+        return !(*this < Rhs) + (*this == Rhs);
+    }
+
+
+    Weight_t wei; // weight of edge
 };
 
 
@@ -43,17 +86,20 @@ struct Graph_base_ {
     //            INT_MAX vertice!
 
     Graph_base_ (int Count = 0) : m_Verts() {
-        assert(Count > 0 &&
+        assert(Count >= 0 &&
                Count <= std::numeric_limits<int>::max() &&
                "Invalid Value: Count");
         Construct_verts(Count);
     }
 
+    Graph_base_ (std::vector<vert*> Rhs) : m_Verts(Rhs) {}
+
     void add_n_verts (int Count) noexcept {
-        assert(Count > 0 &&
+        assert(Count >= 0 &&
                Count <= std::numeric_limits<int>::max() - this->sizeV() &&
                "Invalid Value: Count");
         int startNo = 1 + m_Verts.size();
+        // std::cout << "\nStartNo: " << startNo << "\n"; // (c)
         Construct_verts(Count, startNo);
     }
 
@@ -80,47 +126,6 @@ private:
 
 public:
     std::vector<vert*> m_Verts;
-};
-
-
-template <
-    class Weight_t
->
-struct edge : edge_base_ {
-    using Mybase = edge_base_;
-    using vert   = Mybase::vert;
-
-    edge (vert* Vs, vert* Vt, Weight_t Weight) : edge_base_(Vs, Vt), wei(Weight) {}
-
-    ~edge() {
-        wei = Weight_t {0};
-    }
-
-    vert* source() noexcept { return Mybase::sou; }
-    vert* targer() noexcept { return Mybase::tar; }
-
-    bool operator== (const edge& Rhs) const noexcept {
-        return (Mybase::tar == Rhs.tar) * (Mybase::sou == Rhs.sou) * (wei == Rhs.wei);
-    }
-
-    bool operator< (const edge& Rhs) const noexcept {
-        return wei < Rhs.wei;
-    }
-
-    bool operator<= (const edge& Rhs) const noexcept {
-        return (*this < Rhs) + (*this == Rhs);
-    }
-
-    bool operator> (const edge& Rhs) const noexcept {
-        return !(*this < Rhs);
-    }
-
-    bool operator>= (const edge& Rhs) const noexcept {
-        return !(*this < Rhs) + (*this == Rhs);
-    }
-
-
-    Weight_t wei; // weight of edge
 };
 
 
@@ -161,9 +166,12 @@ private:
         for (int i {0}; i < Mybase::sizeV(); ++i) {
             for (int j {i + 1}; j < Mybase::sizeV(); ++j) {
                 weight_type weight = m_Weightfunc[i][j];
+                // std::cout << "i = " << i << ", j = " << j << "  [i][j] = " << m_Weightfunc[i][j]; // (c)
                 if (weight) { // verts i and j are connected
-                    m_Edges.emplace(m_Verts[i-1], m_Verts[j-1], weight);
+                    // std::cout << " +"; // (c)
+                    m_Edges.emplace(m_Verts[i], m_Verts[j], weight);
                 }
+                // std::cout << "\n"; // (c)
             }
         }
     }
@@ -176,6 +184,17 @@ public:
     // [NOTE]: strict order by wedge::operator<
     // [TODO]: or multimap to find by keys (weight) its useful for MST??
 };
+
+
+template <
+    class Weight_t
+> void print (const weighted_graph<Weight_t>& Graph) {
+    std::cout << "\nGraph: |V| =  " << Graph.sizeV() << ", |E| = " << Graph.sizeE() << "\n";
+    for (auto Eit = Graph.m_Edges.begin(); Eit != Graph.m_Edges.end(); ++Eit) {
+        // std::cout << "hello";
+        std::cout << "source: " << *(*Eit).sou << " target: " << *(*Eit).tar << " [" << (*Eit).wei << "]\n";
+    }
+}
 
 
 // no weights on edges, just 1 if i, j verts connected, else 0
