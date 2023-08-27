@@ -15,7 +15,7 @@ using vert = Graph_base_::vert;
 
 
 struct dsf { // disjoint-set union
-             // disjoint-set forest + union by rank + path compression
+             // disjoint-set forest + union by size + path compression
 
     // [WARNING]: Count shoud equals m_Verts.size() else
     //            make_set can cause segmentation error
@@ -25,6 +25,7 @@ struct dsf { // disjoint-set union
 
     ~dsf() {
         parents.clear();
+        sizes.clear();
     }
 
     void make_set (vert* V) {
@@ -40,16 +41,17 @@ struct dsf { // disjoint-set union
         return V;
     }
 
+    // [NOTE]: union by size
     void unite_sets (vert* V, vert* U) {
-        vert* Vroot = find_set(V);
         vert* Uroot = find_set(U);
+        vert* Vroot = find_set(V);
 
-        if (Vroot != Uroot) {
-            if (sizes[*Vroot] < sizes[*Uroot]) {
-                std::swap(Vroot, Uroot);
+        if (Uroot != Vroot) {
+            if (sizes[*Uroot] < sizes[*Vroot]) {
+                std::swap(Uroot, Vroot);
             }
-            parents[*Uroot] = Vroot;
-            sizes[*Vroot] += sizes[*Uroot];
+            parents[*Vroot] = Uroot;
+            sizes[*Uroot] += sizes[*Vroot];
         }
     }
 
