@@ -127,6 +127,7 @@ private:
     }
 
 public:
+    // [WARNING]: m_Verts MUST be sorted manually!
     std::vector<vert*> m_Verts;
 };
 
@@ -144,7 +145,7 @@ struct weighted_graph : Graph_base_ {
 
     // generate graph with Count verts and zero weight function
     // Graph = { verts:Count, wedges:0,  weight_funct==0 }
-    weighted_graph (int Count = 0) : Graph_base_(Count) {
+    weighted_graph (int Count) : Graph_base_(Count) {
         m_Weightfunc = std::vector<std::vector<int>>(Count, std::vector<int>(Count, 0));
     }
 
@@ -155,8 +156,20 @@ struct weighted_graph : Graph_base_ {
         Construct_edges();
     }
 
+    weighted_graph (std::vector<std::vector<int>> Weightfunc) :
+        m_Weightfunc(Weightfunc),
+        m_Edges()
+    {
+        Mybase::add_n_verts( (int)m_Weightfunc.size() );
+        Construct_edges();
+    }
+
     // [WARNING]: shallow copy only provided!
-    weighted_graph (const weighted_graph& Rhs) : Graph_base_(Rhs.m_Verts), m_Edges(Rhs.m_Edges) {}
+    weighted_graph (const weighted_graph& Rhs) :
+        Graph_base_(Rhs.m_Verts),
+        m_Weightfunc(Rhs.m_Weightfunc),
+        m_Edges(Rhs.m_Edges)
+    {}
 
     int sizeE() const noexcept {
         return (int)m_Edges.size();

@@ -19,7 +19,6 @@ void print (const _Container_t<_Value_t>& Cont) {
 }
 
 enum color { black, green, yellow };
-// enum MST_Algo_t { Prim, Kruskal };
 
 int main() {
     // weighted_graph<int> graph { "weight_func.txt" };

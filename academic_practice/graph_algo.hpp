@@ -16,6 +16,7 @@
 #include <stack>
 #include <set>
 #include <utility>
+#include <algorithm>
 #include "graph.hpp"
 #include "dsf.hpp"
 
@@ -103,25 +104,33 @@ template <
 >
 inline weighted_graph<int> generateMST (const weighted_graph<int>& Graph);
 
-template <>
+template <> // template specialization when generate MST by Kruskal's algorithm
 inline weighted_graph<int> generateMST<Kruskal> (const weighted_graph<int>& Graph) {
-    weighted_graph<int> Result(Graph.sizeV());
-    // dsf dsf_verts (Graph.m_Verts);
-    dsf dsf_verts(Graph.sizeV());
-    for (int i = 0; i < Graph.sizeV(); ++i) {
+    int countV = Graph.sizeV();
+
+    weighted_graph<int> Result(countV);
+
+    dsf dsf_verts(countV);
+    for (int i = 0; i < countV; ++i) {
         dsf_verts.make_set(Graph.m_Verts[i]);
     }
 
     for (auto Eit = Graph.m_Edges.begin(); Eit != Graph.m_Edges.end(); ++Eit) {
-        vert* V = (*Eit).sou;
-        vert* U = (*Eit).tar;
-        if (dsf_verts.find_set(V) != dsf_verts.find_set(U)) {
-            dsf_verts.unite_sets(V,U);
-            Result.m_Verts.push_back(U);
-            Result.m_Verts.push_back(V);
-            Result.m_Edges.insert(*Eit);
+        vert* U = (*Eit).sou;
+        vert* V = (*Eit).tar;
+        if (dsf_verts.find_set(U) != dsf_verts.find_set(V)) {
+            dsf_verts.unite_sets(U,V);
+            Result.m_Verts[*U] = new vert(*U);
+            Result.m_Verts[*V] = new vert(*V);
+            Result.m_Edges.emplace(
+                Result.m_Verts[*U],
+                Result.m_Verts[*V],
+                Graph.m_Weightfunc[*U][*V]
+            );
         }
+        if (Result.sizeE() == countV - 1) { break; }
     }
+    Result.m_Weightfunc = Graph.m_Weightfunc;
     return Result;
 }
 
