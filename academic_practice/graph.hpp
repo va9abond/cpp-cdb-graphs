@@ -142,7 +142,7 @@ struct weighted_graph : Graph_base_ {
 
     // generate graph with Count verts and zero weight function
     // Graph = { verts:Count, wedges:0,  weight_funct==0 }
-    weighted_graph (int Count) : Graph_base_(Count) {
+    weighted_graph (int Count = 0) : Graph_base_(Count) {
         m_Weightfunc = std::vector<std::vector<int>>(Count, std::vector<int>(Count, 0));
     }
 
@@ -189,10 +189,10 @@ public:
 template <
     class Weight_t
 > void print (const weighted_graph<Weight_t>& Graph) {
-    std::cout << "\nGraph: |V| =  " << Graph.sizeV() << ", |E| = " << Graph.sizeE() << "\n";
+    std::cout << "\nGraph: |V| = " << Graph.sizeV() << ", |E| = " << Graph.sizeE() << "\n";
     for (auto Eit = Graph.m_Edges.begin(); Eit != Graph.m_Edges.end(); ++Eit) {
         // std::cout << "hello";
-        std::cout << "source: " << *(*Eit).sou << " target: " << *(*Eit).tar << " [" << (*Eit).wei << "]\n";
+        std::cout << "source: " << *(*Eit).sou << ";  target: " << *(*Eit).tar << " [" << (*Eit).wei << "]\n";
     }
 }
 
