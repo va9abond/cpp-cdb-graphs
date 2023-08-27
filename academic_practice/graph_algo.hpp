@@ -120,8 +120,13 @@ inline weighted_graph<int> generateMST<Kruskal> (const weighted_graph<int>& Grap
         vert* V = (*Eit).tar;
         if (dsf_verts.find_set(U) != dsf_verts.find_set(V)) {
             dsf_verts.unite_sets(U,V);
+#if 1
             Result.m_Verts[*U] = new vert(*U);
             Result.m_Verts[*V] = new vert(*V);
+#else
+            Result.m_Verts[*U] = U;
+            Result.m_Verts[*V] = V;
+#endif
             Result.m_Edges.emplace(
                 Result.m_Verts[*U],
                 Result.m_Verts[*V],

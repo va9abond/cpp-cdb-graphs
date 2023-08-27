@@ -98,8 +98,24 @@ int main() {
     weighted_graph<int> Graph ("weight_func.txt");
     print(Graph);
 
-    auto MST = generateMST<Kruskal>(Graph);
+    weighted_graph<int> MST = generateMST<Kruskal>(Graph);
     print(MST);
+
+    // int a = 42;   int* pa = &a;
+    // int b = 34;   int* pb = &b;
+    // int c = 2234; int* pc = &c;
+    //               int* pm = new int(100);
+    //
+    // std::vector<int*> pv = { pm, pa, pb, pc };
+    // std::cout << *pv[0] << "\n";
+    // print(pv);
+    // std::vector<int*> other(pv);
+    // // delete pm; pm = nullptr;
+    // // *other[0] = 8;
+    // std::cout << *pv[0] << "\n";
+    // print(other);
+    // delete pm; pm = nullptr;
+    // print(pv); print(other); std::cout << *other[0];
 
     return 0;
 }
