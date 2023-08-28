@@ -108,7 +108,8 @@ template <> // template specialization when generate MST by Kruskal's algorithm
 inline weighted_graph<int> generateMST<Kruskal> (const weighted_graph<int>& Graph) {
     int countV = Graph.sizeV();
 
-    weighted_graph<int> Result(countV);
+    weighted_graph<int> Result(0);
+    Result.m_Verts.resize(countV);
 
     dsf dsf_verts(countV);
     for (int i = 0; i < countV; ++i) {
