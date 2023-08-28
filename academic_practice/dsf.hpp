@@ -24,8 +24,8 @@ struct dsf { // disjoint-set union
     dsf (const std::vector<vert*>& verts) : parents(verts), sizes(verts.size(), 1) {}
 
     ~dsf() {
-        parents.clear();
         sizes.clear();
+        parents.clear();
     }
 
     void make_set (vert* V) {

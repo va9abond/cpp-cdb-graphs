@@ -115,6 +115,7 @@ struct Graph_base_ {
                 *Vit = nullptr;
             }
         }
+        m_Verts.clear();
     }
 
     int sizeV() const noexcept { return (int)m_Verts.size(); }
@@ -170,6 +171,11 @@ struct weighted_graph : Graph_base_ {
         m_Weightfunc(Rhs.m_Weightfunc),
         m_Edges(Rhs.m_Edges)
     {}
+
+    ~weighted_graph() {
+        m_Edges.clear();
+        m_Weightfunc.clear();
+    }
 
     int sizeE() const noexcept {
         return (int)m_Edges.size();

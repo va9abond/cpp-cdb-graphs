@@ -99,7 +99,11 @@ int main() {
     print(Graph);
 
     weighted_graph<int> MST = generateMST<Kruskal>(Graph);
-    print(MST);
+    print(MST); std::cout << "\n";
+
+    for (auto it = MST.m_Edges.begin(); it != MST.m_Edges.end(); ++it) {
+        std::cout << (*it).tar << " -> " << *(*it).tar << (*it).sou << " -> " << *(*it).sou << "\n";
+    }
 
     // int a = 42;   int* pa = &a;
     // int b = 34;   int* pb = &b;
