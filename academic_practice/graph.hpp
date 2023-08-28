@@ -55,7 +55,11 @@ struct edge : edge_base_ {
 
     // if weigths is equal, then random
     bool operator< (const edge& Rhs) const noexcept {
-        return (wei != Rhs.wei ? wei < Rhs.wei : true);
+        if (wei != Rhs.wei) {
+            return wei < Rhs.wei;
+        } else {
+            return (*sou != *Rhs.sou ? *sou < *Rhs.sou : *tar < * Rhs.tar);
+        }
     }
 
     bool operator<= (const edge& Rhs) const noexcept {
@@ -86,8 +90,8 @@ struct Graph_base_ {
     //            INT_MAX vertice!
 
     Graph_base_ (int Count = 0) : m_Verts() {
-        assert(Count >= 0 &&
-               Count <= std::numeric_limits<int>::max() &&
+        assert(Count >= 0 ||
+               Count <= std::numeric_limits<int>::max() ||
                "Invalid Value: Count");
         Construct_verts(Count);
     }
@@ -95,8 +99,8 @@ struct Graph_base_ {
     Graph_base_ (std::vector<vert*> Rhs) : m_Verts(Rhs) {}
 
     void add_n_verts (int Count) noexcept {
-        assert(Count >= 0 &&
-               Count <= std::numeric_limits<int>::max() - this->sizeV() &&
+        assert(Count >= 0 ||
+               Count <= std::numeric_limits<int>::max() - this->sizeV() ||
                "Invalid Value: Count");
         int startNo = m_Verts.size();
         // std::cout << "\nStartNo: " << startNo << "\n"; // (c)
@@ -204,17 +208,6 @@ public:
             std::set<wedge>                    m_Edges;
     // [NOTE]: strict order by wedge::operator<
 };
-
-
-template <
-    class Weight_t
-> void print (const weighted_graph<Weight_t>& Graph) {
-    std::cout << "\nGraph: |V| = " << Graph.sizeV() << ", |E| = " << Graph.sizeE() << "\n";
-    for (auto Eit = Graph.m_Edges.begin(); Eit != Graph.m_Edges.end(); ++Eit) {
-        // std::cout << "hello";
-        std::cout << "source: " << *(*Eit).sou << ";  target: " << *(*Eit).tar << " [" << (*Eit).wei << "]\n";
-    }
-}
 
 
 // no weights on edges, just 1 if i, j verts connected, else 0
