@@ -140,4 +140,44 @@ inline weighted_graph<int> generateMST<Kruskal> (const weighted_graph<int>& Grap
 }
 
 
+template <
+    class Weight_t
+> void print (const weighted_graph<Weight_t>& Graph) {
+    std::cout << "\nGraph: |V| = " << Graph.sizeV() << ", |E| = " << Graph.sizeE() << "\n";
+    for (auto Eit = Graph.m_Edges.begin(); Eit != Graph.m_Edges.end(); ++Eit) {
+        // std::cout << "hello";
+        std::cout << "source: " << *(*Eit).sou << ";  target: " << *(*Eit).tar << " [" << (*Eit).wei << "]\n";
+    }
+}
+
+#if 0
+
+inline void DFS_main (const weighted_graph<int> Graph, const vert Vnow, std::vector<vert>& Used, std::vector<vert>& Vindxs) {
+    Used[Vnow] = 1;
+    std::vector<int> weightNbrs { Graph.m_Weightfunc[Vnow] }; // weights of edges with nbrs
+    for (int i = 0; i < (int)weightNbrs.size(); ++i) { //
+        if (weightNbrs[i] && !Used[i]) { // filter neighbours: just unvisiter yet
+            DFS_main(Graph, i, Used, Vindxs);
+            Vindxs.push_back(i);
+        }
+    }
+
+}
+
+
+inline std::vector<vert> DFSvoid (const weighted_graph<int> Graph) {
+    int countV = Graph.sizeV();
+
+    std::vector<int> Vindxs; // verts indexes
+    std::vector<vert> Visited(countV, 0);
+
+    for (int v = 0; v < countV ; ++v) {
+        DFS_main(Graph, *Graph.m_Verts[v], Visited, Vindxs);
+    }
+
+    return Vindxs;
+}
+
+#endif
+
 #endif // GRAPHALGO_HPP

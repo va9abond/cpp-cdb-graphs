@@ -96,10 +96,14 @@ int main() {
 
 
     weighted_graph<int> Graph ("weight_func.txt");
-    print(Graph);
+    // print(Graph);
 
     weighted_graph<int> MST = generateMST<Kruskal>(Graph);
     print(MST);
+
+    // print(DFSvoid(Graph));
+    // print(DFSvoid(MST));
+
 
     // int a = 42;   int* pa = &a;
     // int b = 34;   int* pb = &b;
