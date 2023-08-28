@@ -96,7 +96,7 @@ int main() {
 
 
     weighted_graph<int> Graph ("weight_func.txt");
-    print(Graph);
+    // print(Graph);
 
     weighted_graph<int> MST = generateMST<Kruskal>(Graph);
     print(MST); std::cout << "\n";
@@ -104,6 +104,10 @@ int main() {
     for (auto it = MST.m_Edges.begin(); it != MST.m_Edges.end(); ++it) {
         std::cout << (*it).tar << " -> " << *(*it).tar << (*it).sou << " -> " << *(*it).sou << "\n";
     }
+
+    // print(DFSvoid(Graph));
+    // print(DFSvoid(MST));
+
 
     // int a = 42;   int* pa = &a;
     // int b = 34;   int* pb = &b;
