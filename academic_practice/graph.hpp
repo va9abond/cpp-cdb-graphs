@@ -90,8 +90,8 @@ struct Graph_base_ {
     //            INT_MAX vertice!
 
     Graph_base_ (int Count = 0) : m_Verts() {
-        assert(Count >= 0 &&
-               Count <= std::numeric_limits<int>::max() &&
+        assert(Count >= 0 ||
+               Count <= std::numeric_limits<int>::max() ||
                "Invalid Value: Count");
         Construct_verts(Count);
     }
@@ -99,8 +99,8 @@ struct Graph_base_ {
     Graph_base_ (std::vector<vert*> Rhs) : m_Verts(Rhs) {}
 
     void add_n_verts (int Count) noexcept {
-        assert(Count >= 0 &&
-               Count <= std::numeric_limits<int>::max() - this->sizeV() &&
+        assert(Count >= 0 ||
+               Count <= std::numeric_limits<int>::max() - this->sizeV() ||
                "Invalid Value: Count");
         int startNo = m_Verts.size();
         // std::cout << "\nStartNo: " << startNo << "\n"; // (c)
