@@ -108,39 +108,32 @@ template <> // template specialization when MST generating by Kruskal's algorith
 inline weighted_graph<int> generateMST<Kruskal> (const weighted_graph<int>& Graph) {
     int countV = Graph.sizeV();
 
-    weighted_graph<int> Result(0);
-    Result.m_Verts.resize(countV);
+    int MSTcountE = 0;
+    std::vector<std::vector<int>> res_weightfunc (countV, std::vector<int>(countV, 0));
 
     dsf dsf_verts(countV);
     for (int i = 0; i < countV; ++i) {
         dsf_verts.make_set(Graph.m_Verts[i]);
     }
 
-    for (auto Eit = Graph.m_Edges.begin(); Eit != Graph.m_Edges.end(); ++Eit) {
+    for (
+        auto Eit = Graph.m_Edges.begin();
+        Eit != Graph.m_Edges.end() && MSTcountE < countV - 1;
+        ++Eit
+    ) {
         vert* U = (*Eit).sou;
         vert* V = (*Eit).tar;
         if (dsf_verts.find_set(U) != dsf_verts.find_set(V)) {
             dsf_verts.unite_sets(U,V);
-#if 1
-            Result.m_Verts[*U] = new vert(*U); ++ALLOC_COUNT;
-            Result.m_Verts[*V] = new vert(*V); ++ALLOC_COUNT;
-            // std::cout << "old pointer U: " << U << " -> " << *U
-                // << "; old pointer V: " << V << " -> " << *V << "\n";
-            // std::cout << "new pointer U: " << Result.m_Verts[*U] << " -> " << *Result.m_Verts[*U]
-                // << "; new pointer V: " << Result.m_Verts[*V] << " -> " << *Result.m_Verts[*V] << "\n";
-#else
-            Result.m_Verts[*U] = U;
-            Result.m_Verts[*V] = V;
-#endif
-            Result.m_Edges.emplace(
-                Result.m_Verts[*U],
-                Result.m_Verts[*V],
-                Graph.m_Weightfunc[*U][*V]
-            );
+            // connect tree U with tree V
+            res_weightfunc[*U][*V] = Graph.m_Weightfunc[*U][*V];
+            res_weightfunc[*V][*U] = Graph.m_Weightfunc[*V][*U];
+            ++MSTcountE;
         }
-        if (Result.sizeE() == countV - 1) { break; }
     }
-    Result.m_Weightfunc = Graph.m_Weightfunc;
+
+    // construct MST graph by res_weightfunc
+    weighted_graph<int> Result(res_weightfunc);
     return Result;
 }
 
