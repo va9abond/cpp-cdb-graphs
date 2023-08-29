@@ -110,12 +110,9 @@ struct Graph_base_ {
 
     ~Graph_base_() {
         // [NOTE]: does it really work? (= yes, valgrind approves)
-        // [TODO]: is there a better way?
-        for (auto Vit = m_Verts.begin(); Vit != m_Verts.end(); ++Vit) {
-            if (*Vit != nullptr) {
-                delete *Vit;
-                *Vit = nullptr;
-            }
+        for (vert vi = 0; vi < (int)m_Verts.size(); ++vi) {
+            delete m_Verts[vi];
+            m_Verts[vi] = nullptr;
         }
         m_Verts.clear();
     }
@@ -131,7 +128,6 @@ private:
 
         for (int i {startNo}; i < newsize; ++i) {
             m_Verts[i] = new vert(i);
-            // m_Verts.push_back(new vert(startNo + i));
         }
     }
 
