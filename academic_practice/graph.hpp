@@ -102,9 +102,7 @@ struct Graph_base_ {
         assert(Count >= 0 ||
                Count <= std::numeric_limits<int>::max() - this->sizeV() ||
                "Invalid Value: Count");
-        int startNo = m_Verts.size();
-        // std::cout << "\nStartNo: " << startNo << "\n"; // (c)
-        Construct_verts(Count, startNo);
+        Construct_verts(Count);
     }
 
     Graph_base_& operator= (const Graph_base_&) = delete;
@@ -125,9 +123,15 @@ struct Graph_base_ {
     int sizeV() const noexcept { return (int)m_Verts.size(); }
 
 private:
-    void Construct_verts (int Count, int startNo = 0) noexcept {
-        for (int i {0}; i < Count; ++i) {
-            m_Verts.push_back(new vert(startNo + i));
+    void Construct_verts (int Count) noexcept {
+        int startNo = m_Verts.size();
+        int newsize = startNo + Count;
+
+        m_Verts.resize(newsize);
+
+        for (int i {startNo}; i < newsize; ++i) {
+            m_Verts[i] = new vert(i);
+            // m_Verts.push_back(new vert(startNo + i));
         }
     }
 

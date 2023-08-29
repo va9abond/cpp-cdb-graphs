@@ -132,11 +132,11 @@ inline weighted_graph<int> generateMST<Kruskal> (const weighted_graph<int>& Grap
             Result.m_Verts[*U] = U;
             Result.m_Verts[*V] = V;
 #endif
-            Result.m_Edges.insert({
+            Result.m_Edges.emplace(
                 Result.m_Verts[*U],
                 Result.m_Verts[*V],
                 Graph.m_Weightfunc[*U][*V]
-            });
+            );
         }
         if (Result.sizeE() == countV - 1) { break; }
     }
