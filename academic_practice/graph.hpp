@@ -11,6 +11,10 @@
 // [TODO]: tree is derived class from Grap_base_ with static_assert(is_tree);
 
 
+static uint ALLOC_COUNT = 0;
+static uint DELETE_COUNT = 0;
+
+
 struct edge_base_ {
     // +---------------------------------------------------------+
     /* | */ using vert = int;                                 // |
@@ -105,13 +109,14 @@ struct Graph_base_ {
         Construct_verts(Count);
     }
 
-    Graph_base_& operator= (const Graph_base_&) = delete;
-    Graph_base_ (const Graph_base_&)            = delete;
+    // Graph_base_& operator= (const Graph_base_&) = delete;
+    // Graph_base_ (const Graph_base_&)            = delete;
 
     ~Graph_base_() {
         // [NOTE]: does it really work? (= yes, valgrind approves)
         for (vert vi = 0; vi < (int)m_Verts.size(); ++vi) {
             delete m_Verts[vi];
+            ++DELETE_COUNT;
             m_Verts[vi] = nullptr;
         }
         m_Verts.clear();
@@ -127,7 +132,7 @@ private:
         m_Verts.resize(newsize);
 
         for (int i {startNo}; i < newsize; ++i) {
-            m_Verts[i] = new vert(i);
+            m_Verts[i] = new vert(i); ++ALLOC_COUNT;
         }
     }
 

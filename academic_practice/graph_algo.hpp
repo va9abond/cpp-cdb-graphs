@@ -104,7 +104,7 @@ template <
 >
 inline weighted_graph<int> generateMST (const weighted_graph<int>& Graph);
 
-template <> // template specialization when generate MST by Kruskal's algorithm
+template <> // template specialization when MST generating by Kruskal's algorithm
 inline weighted_graph<int> generateMST<Kruskal> (const weighted_graph<int>& Graph) {
     int countV = Graph.sizeV();
 
@@ -122,12 +122,12 @@ inline weighted_graph<int> generateMST<Kruskal> (const weighted_graph<int>& Grap
         if (dsf_verts.find_set(U) != dsf_verts.find_set(V)) {
             dsf_verts.unite_sets(U,V);
 #if 1
-            Result.m_Verts[*U] = new vert(*U);
-            Result.m_Verts[*V] = new vert(*V);
-            std::cout << "old pointer U: " << U << " -> " << *U
-                << "; old pointer V: " << V << " -> " << *V << "\n";
-            std::cout << "new pointer U: " << Result.m_Verts[*U] << " -> " << *Result.m_Verts[*U]
-                << "; new pointer V: " << Result.m_Verts[*V] << " -> " << *Result.m_Verts[*V] << "\n";
+            Result.m_Verts[*U] = new vert(*U); ++ALLOC_COUNT;
+            Result.m_Verts[*V] = new vert(*V); ++ALLOC_COUNT;
+            // std::cout << "old pointer U: " << U << " -> " << *U
+                // << "; old pointer V: " << V << " -> " << *V << "\n";
+            // std::cout << "new pointer U: " << Result.m_Verts[*U] << " -> " << *Result.m_Verts[*U]
+                // << "; new pointer V: " << Result.m_Verts[*V] << " -> " << *Result.m_Verts[*V] << "\n";
 #else
             Result.m_Verts[*U] = U;
             Result.m_Verts[*V] = V;

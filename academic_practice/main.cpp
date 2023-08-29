@@ -99,11 +99,15 @@ int main() {
     // print(Graph);
 
     weighted_graph<int> MST = generateMST<Kruskal>(Graph);
-    print(MST); std::cout << "\n";
+    // print(MST); std::cout << "\n";
 
-    for (auto it = MST.m_Edges.begin(); it != MST.m_Edges.end(); ++it) {
-        std::cout << (*it).tar << " -> " << *(*it).tar << (*it).sou << " -> " << *(*it).sou << "\n";
-    }
+    std::cout << "ALLOC_COUNT: " << ALLOC_COUNT << "\n";
+    std::cout << "DELETE_COUNT: " << DELETE_COUNT << "\n";
+
+
+    // for (auto it = MST.m_Edges.begin(); it != MST.m_Edges.end(); ++it) {
+    //     std::cout << (*it).tar << " -> " << *(*it).tar << (*it).sou << " -> " << *(*it).sou << "\n";
+    // }
 
     // print(DFSvoid(Graph));
     // print(DFSvoid(MST));
