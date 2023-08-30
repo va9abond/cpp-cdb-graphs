@@ -101,8 +101,9 @@ int main() {
     weighted_graph<int> MST = generateMST<Kruskal>(Graph);
     // print(MST); std::cout << "\n";
 
-    std::vector<vert> DFSresult = DFSinit(Graph);
+    std::vector<vert> DFSresult = DFSprint_init(Graph);
     print(DFSresult);
+
     // for (auto Vit = DFSresult.begin(); Vit != DFSresult.end(); ++Vit) {
         // std::cout << "\n" << (*Vit) << " ";
     // }
