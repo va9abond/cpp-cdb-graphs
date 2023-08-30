@@ -149,12 +149,12 @@ template <
 }
 
 
-inline void DFSmain (const weighted_graph<int> Graph, const vert* Vnow, std::vector<vert>& Visited, std::vector<vert>& Vindxs) {
+inline void DFSprint_main (const weighted_graph<int>& Graph, const vert* Vnow, std::vector<vert>& Visited, std::vector<vert>& Vindxs) {
     Visited[*Vnow] = 1;
     std::vector<int> weightNbrs { Graph.m_Weightfunc[*Vnow] }; // weights of edges with nbrs
     for (int vi = 0; vi < (int)weightNbrs.size(); ++vi) { //
         if (weightNbrs[vi] && !Visited[vi]) { // filter neighbours: just unvisiter yet
-            DFSmain(Graph, Graph.m_Verts[vi], Visited, Vindxs);
+            DFSprint_main(Graph, Graph.m_Verts[vi], Visited, Vindxs);
             Vindxs.push_back(*Graph.m_Verts[vi]);
         }
     }
@@ -162,7 +162,7 @@ inline void DFSmain (const weighted_graph<int> Graph, const vert* Vnow, std::vec
 }
 
 
-inline std::vector<vert> DFSinit (const weighted_graph<int> Graph) {
+inline std::vector<vert> DFSprint_init (const weighted_graph<int>& Graph) {
     int countV = Graph.sizeV();
 
     std::vector<vert> Vindxs; // verts indexes
@@ -170,7 +170,7 @@ inline std::vector<vert> DFSinit (const weighted_graph<int> Graph) {
 
     for (int vi = 0; vi < countV ; ++vi) {
         if (!Visited[vi]) {
-            DFSmain(Graph, Graph.m_Verts[vi], Visited, Vindxs);
+            DFSprint_main(Graph, Graph.m_Verts[vi], Visited, Vindxs);
         }
     }
 
