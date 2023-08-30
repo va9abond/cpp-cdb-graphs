@@ -96,14 +96,16 @@ int main() {
 
 
     weighted_graph<int> Graph ("weight_func.txt");
-    print(Graph);
+    // print(Graph);
 
     weighted_graph<int> MST = generateMST<Kruskal>(Graph);
-    print(MST); std::cout << "\n";
+    // print(MST); std::cout << "\n";
 
-    // std::cout << "ALLOC_COUNT: " << ALLOC_COUNT << "\n";
-    // std::cout << "DELETE_COUNT: " << DELETE_COUNT << "\n";
-
+    std::vector<vert> DFSresult = DFSinit(Graph);
+    print(DFSresult);
+    // for (auto Vit = DFSresult.begin(); Vit != DFSresult.end(); ++Vit) {
+        // std::cout << "\n" << (*Vit) << " ";
+    // }
 
     // for (auto it = MST.m_Edges.begin(); it != MST.m_Edges.end(); ++it) {
     //     std::cout << (*it).tar << " -> " << *(*it).tar << (*it).sou << " -> " << *(*it).sou << "\n";

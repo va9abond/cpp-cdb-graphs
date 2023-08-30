@@ -148,34 +148,34 @@ template <
     }
 }
 
-#if 0
 
-inline void DFS_main (const weighted_graph<int> Graph, const vert Vnow, std::vector<vert>& Used, std::vector<vert>& Vindxs) {
-    Used[Vnow] = 1;
-    std::vector<int> weightNbrs { Graph.m_Weightfunc[Vnow] }; // weights of edges with nbrs
-    for (int i = 0; i < (int)weightNbrs.size(); ++i) { //
-        if (weightNbrs[i] && !Used[i]) { // filter neighbours: just unvisiter yet
-            DFS_main(Graph, i, Used, Vindxs);
-            Vindxs.push_back(i);
+inline void DFSmain (const weighted_graph<int> Graph, const vert* Vnow, std::vector<vert>& Visited, std::vector<vert>& Vindxs) {
+    Visited[*Vnow] = 1;
+    std::vector<int> weightNbrs { Graph.m_Weightfunc[*Vnow] }; // weights of edges with nbrs
+    for (int vi = 0; vi < (int)weightNbrs.size(); ++vi) { //
+        if (weightNbrs[vi] && !Visited[vi]) { // filter neighbours: just unvisiter yet
+            DFSmain(Graph, Graph.m_Verts[vi], Visited, Vindxs);
+            Vindxs.push_back(*Graph.m_Verts[vi]);
         }
     }
 
 }
 
 
-inline std::vector<vert> DFSvoid (const weighted_graph<int> Graph) {
+inline std::vector<vert> DFSinit (const weighted_graph<int> Graph) {
     int countV = Graph.sizeV();
 
-    std::vector<int> Vindxs; // verts indexes
-    std::vector<vert> Visited(countV, 0);
+    std::vector<vert> Vindxs; // verts indexes
+    std::vector<vert> Visited (countV, 0);
 
-    for (int v = 0; v < countV ; ++v) {
-        DFS_main(Graph, *Graph.m_Verts[v], Visited, Vindxs);
+    for (int vi = 0; vi < countV ; ++vi) {
+        if (!Visited[vi]) {
+            DFSmain(Graph, Graph.m_Verts[vi], Visited, Vindxs);
+        }
     }
 
     return Vindxs;
 }
 
-#endif
 
 #endif // GRAPHALGO_HPP
