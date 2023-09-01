@@ -1,10 +1,8 @@
 // [TODO]: is_tree (связность + ацикличность)
 // [TODO]: Back removing
-// [TODO]: Kruskal
 // [TODO]: Prima
 // [TODO]: Boruvka
 //
-// [TODO]: make ostov
 // [TODO]: make min ostov
 
 
@@ -48,8 +46,8 @@
 //         Queue.pop();
 //     }
 // }
-//
-//
+
+
 // template <
 //     class Graph_t
 // >

@@ -13,11 +13,12 @@
 
 struct edge_base_ {
     // +---------------------------------------------------------+
-    /* | */ using vert = int;                                 // |
+    /* | */ using vert    = int;                              // |
+    /* | */ using vertptr = vert*;                            // |
     // +---------------------------------------------------------+
 
 
-    edge_base_(vert* Vs, vert* Vt) : sou(Vs), tar(Vt) {}
+    edge_base_(vertptr Vs, vertptr Vt) : sou(Vs), tar(Vt) {}
 
     ~edge_base_() {
         sou = nullptr;
@@ -28,8 +29,8 @@ struct edge_base_ {
     // edge_base_& operator= (const edge_base_&) = delete;
 
 
-    vert* sou; // source vertice
-    vert* tar; // target vertice
+    vertptr sou; // source vertice
+    vertptr tar; // target vertice
 };
 
 
@@ -37,8 +38,10 @@ template <
     class Weight_t
 >
 struct edge : edge_base_ {
-    using Mybase = edge_base_;
-    using vert   = Mybase::vert;
+    using Mybase  = edge_base_;
+    using vert    = Mybase::vert;
+    using vertprt = Mybase::vertptr;
+
 
     edge (vert* Vs, vert* Vt, Weight_t Weight) : edge_base_(Vs, Vt), wei(Weight) {}
 
@@ -83,6 +86,7 @@ struct Graph_base_ {
     //                         Traits
     // +---------------------------------------------------------+
     /* | */   using vert      = int;                          // |
+    /* | */   using vertptr   = vert*;                        // |
     /* | */   using size_type = std::set<vert*>::size_type;   // |
     // +---------------------------------------------------------+
     // [WARNING]: Despite the fact that size_type is usigned long
@@ -133,7 +137,7 @@ private:
 
 public:
     // [WARNING]: m_Verts MUST be sorted manually!
-    std::vector<vert*> m_Verts;
+    std::vector<vertptr> m_Verts;
 };
 
 
@@ -223,6 +227,7 @@ struct oriented_graph : weighted_graph<Weight_t> {
     using weight_type = bool;
     using size_type   = typename Mybase::size_type;
     using vert        = typename Mybase::vert;
+    using vertptr     = typename Mybase::vertptr;
     using Mybase::Mybase;
 };
 
