@@ -11,8 +11,8 @@ which implemented in file "graph.hpp" */
 #include "graph.hpp"
 
 
-using vert = Graph_base_::vert;
-
+using vert    = Graph_base_::vert;
+using vertptr = Graph_base_::vertptr;
 
 struct dsf { // disjoint-set union
              // disjoint-set forest + union by size + path compression
