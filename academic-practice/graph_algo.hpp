@@ -92,6 +92,7 @@
     // }
 // }
 
+// minimal-spanning-tree problem algorithm type
 enum MST_Algo_t {
     Prim,
     Kruskal
@@ -147,23 +148,22 @@ template <
 }
 
 
-inline void DFSprint_main (const weighted_graph<int>& Graph, const vert* Vnow, std::vector<vert>& Visited, std::vector<vert>& Vindxs) {
+inline void DFSprint_main (const weighted_graph<int>& Graph, const vert* Vnow, std::vector<vert>& Visited, std::vector<vertptr>& Vindxs) {
     Visited[*Vnow] = 1;
     std::vector<int> weightNbrs { Graph.m_Weightfunc[*Vnow] }; // weights of edges with nbrs
     for (int vi = 0; vi < (int)weightNbrs.size(); ++vi) { //
         if (weightNbrs[vi] && !Visited[vi]) { // filter neighbours: just unvisiter yet
             DFSprint_main(Graph, Graph.m_Verts[vi], Visited, Vindxs);
-            Vindxs.push_back(*Graph.m_Verts[vi]);
+            Vindxs.push_back(Graph.m_Verts[vi]);
         }
     }
-
 }
 
 
-inline std::vector<vert> DFSprint_init (const weighted_graph<int>& Graph) {
+inline std::vector<vertptr> DFSprint_init (const weighted_graph<int>& Graph) {
     int countV = Graph.sizeV();
 
-    std::vector<vert> Vindxs; // verts indexes
+    std::vector<vertptr> Vindxs; // verts indexes
     std::vector<vert> Visited (countV, 0);
 
     for (int vi = 0; vi < countV ; ++vi) {
@@ -174,6 +174,84 @@ inline std::vector<vert> DFSprint_init (const weighted_graph<int>& Graph) {
 
     return Vindxs;
 }
+
+inline void DFSprint (const weighted_graph<int>& Graph)
+{
+    std::vector<vertptr> DFSresult = DFSprint_init(Graph);
+    std::cout << "\n" << "{\n";
+    for (const auto& V : DFSresult) {
+        std::cout << "    " << *V << "  " << V << "\n";
+    }
+    std::cout << "};";
+}
+
+
+// shortest-path problem algorithm type
+enum SP_Algo_t
+{
+    Bellman_Ford,
+};
+
+#if 0
+inline void init_single_source (const weighted_graph<int>& Graph, const vertptr Source)
+{
+    std::vector<int> estimates(Graph.sizeV(), std::numeric_limits<int>::max());
+    std::vector<vertptr> predecessors(Graph.sizeV(), nullptr);
+    estimates[*Source] = 0;
+}
+#endif
+
+// template <
+//     SP_Algo_t algo_t
+// >
+// inline std::map<std::pair<vert,vert>, std::vector<int>> generateSP (
+//     const weighted_graph<int>&, const vertptr, const vertptr);
+//
+// template<>
+// inline std::map<std::pair<vert,vert>, std::vector<int>> generateSP<Bellman_Ford> (
+//     const weighted_graph<int>& Graph, const vertptr Source, const vertptr Target)
+// {
+//     using wedge = weighted_graph<int>::wedge;
+//
+//     const int countV = Graph.sizeV();
+//     // init single source
+//     std::vector<int> estimates (countV, std::numeric_limits<int>::max());
+//     std::vector<vertptr> preds (countV, nullptr); // predecessor of each vert
+//     estimates[*Source] = 0;
+//
+//     // main loop
+//     for (int i {0}; i < countV - 1; ++i) {
+//         // relaxation
+//         for (const wedge& E : Graph.m_Edges) {
+//             // sou ---> tar
+//             if (estimates[*E.tar] < estimates[*E.sou] + E.wei) {
+//                 estimates[*E.tar] = estimates[*E.sou] + E.wei;
+//                 preds[*E.tar] = E.sou;
+//             }
+//             // tar ---> sou
+//             if (estimates[*E.sou] < estimates[*E.tar] + E.wei) {
+//                 estimates[*E.sou] = estimates[*E.tar] + E.wei;
+//                 preds[*E.tar] = E.sou;
+//             }
+//         }
+//     }
+//     // check a negative loop
+//     for (const wedge& E : Graph.m_Edges) {
+//         // sou ---> tar
+//         if (estimates[*E.tar] < estimates[*E.sou] + E.wei) {
+//             return false;
+//         }
+//         // tar ---> sou
+//         if (estimates[*E.sou] < estimates[*E.tar] + E.wei) {
+//             return false;
+//         }
+//     }
+// }
+
+
+
+
+
 
 
 #endif // GRAPHALGO_HPP

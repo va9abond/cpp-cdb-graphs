@@ -18,7 +18,7 @@ struct edge_base_ {
     // +---------------------------------------------------------+
 
 
-    edge_base_(vertptr Vs, vertptr Vt) : sou(Vs), tar(Vt) {}
+    edge_base_ (vertptr Vs, vertptr Vt) : sou(Vs), tar(Vt) {}
 
     ~edge_base_() {
         sou = nullptr;
