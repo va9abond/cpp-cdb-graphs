@@ -6,6 +6,8 @@
 #include "graph_algo.hpp"
 
 
+namespace msl { // ==== msl begin ====
+
 template<
     template <class... > class _Container_t,
     class _Value_t
@@ -18,7 +20,8 @@ void print (const _Container_t<_Value_t>& Cont) {
     std::cout << "};\n";
 }
 
-enum color { black, green, yellow };
+} // ==== msl end ====
+
 
 int main() {
     // weighted_graph<int> graph { "weight_func.txt" };
@@ -101,9 +104,15 @@ int main() {
     weighted_graph<int> MST = generateMST<Kruskal>(Graph);
     // print(MST); std::cout << "\n";
 
-    DFSprint(Graph);
-    DFSprint(MST);
+    // DFSprint(Graph);
+    // DFSprint(MST);
 
+
+    vertptr startV = Graph.m_Verts[0];
+    auto res = generateSP<Bellman_Ford>(Graph, startV);
+    generateSP_print(res, startV);
+
+    //
     // for (auto Vit = DFSresult.begin(); Vit != DFSresult.end(); ++Vit) {
         // std::cout << "\n" << (*Vit) << " ";
     // }

@@ -71,6 +71,7 @@
 // }
 
 
+// ==== minimal-spanning-tree problem ====
 // [pseudocode]: generate Minimal Spannig Tree
 // inline weighted_graph<int> generic_MST (const weighted_graph<int>& Graph) {
     // 0. init MST {Graph.m_Verts, empty_set};
@@ -92,7 +93,6 @@
     // }
 // }
 
-// minimal-spanning-tree problem algorithm type
 enum MST_Algo_t {
     Prim,
     Kruskal
@@ -137,6 +137,7 @@ inline weighted_graph<int> generateMST<Kruskal> (const weighted_graph<int>& Grap
 }
 
 
+// ==== Graph printing ====
 template <
     class Weight_t
 > void print (const weighted_graph<Weight_t>& Graph) {
@@ -186,7 +187,7 @@ inline void DFSprint (const weighted_graph<int>& Graph)
 }
 
 
-// shortest-path problem algorithm type
+// ==== shortest-path problem algorithm type ====
 enum SP_Algo_t
 {
     Bellman_Ford,
@@ -201,53 +202,95 @@ inline void init_single_source (const weighted_graph<int>& Graph, const vertptr 
 }
 #endif
 
-// template <
-//     SP_Algo_t algo_t
-// >
-// inline std::map<std::pair<vert,vert>, std::vector<int>> generateSP (
-//     const weighted_graph<int>&, const vertptr, const vertptr);
-//
-// template<>
-// inline std::map<std::pair<vert,vert>, std::vector<int>> generateSP<Bellman_Ford> (
-//     const weighted_graph<int>& Graph, const vertptr Source, const vertptr Target)
-// {
-//     using wedge = weighted_graph<int>::wedge;
-//
-//     const int countV = Graph.sizeV();
-//     // init single source
-//     std::vector<int> estimates (countV, std::numeric_limits<int>::max());
-//     std::vector<vertptr> preds (countV, nullptr); // predecessor of each vert
-//     estimates[*Source] = 0;
-//
-//     // main loop
-//     for (int i {0}; i < countV - 1; ++i) {
-//         // relaxation
-//         for (const wedge& E : Graph.m_Edges) {
-//             // sou ---> tar
-//             if (estimates[*E.tar] < estimates[*E.sou] + E.wei) {
-//                 estimates[*E.tar] = estimates[*E.sou] + E.wei;
-//                 preds[*E.tar] = E.sou;
-//             }
-//             // tar ---> sou
-//             if (estimates[*E.sou] < estimates[*E.tar] + E.wei) {
-//                 estimates[*E.sou] = estimates[*E.tar] + E.wei;
-//                 preds[*E.tar] = E.sou;
-//             }
-//         }
-//     }
-//     // check a negative loop
-//     for (const wedge& E : Graph.m_Edges) {
-//         // sou ---> tar
-//         if (estimates[*E.tar] < estimates[*E.sou] + E.wei) {
-//             return false;
-//         }
-//         // tar ---> sou
-//         if (estimates[*E.sou] < estimates[*E.tar] + E.wei) {
-//             return false;
-//         }
-//     }
-// }
+inline std::vector<vert> generate_path_ (std::vector<vertptr>& Preds, const vertptr Source, vertptr Target)
+{
+    // assert(Source != Target);
+    std::vector<vert> Path;
+    vertptr Vprev = Target;
 
+    while (Vprev != Source) { // Preds[*Vprev], i.e. Preds[*Vstart] = nullptr;
+        Path.push_back(*Vprev);
+        Vprev = Preds[*Vprev];
+    }
+    Path.push_back(*Source);
+    std::reverse(Path.begin(), Path.end());
+    return Path;
+}
+
+template <
+    SP_Algo_t algo_t
+>
+inline std::map<vertptr, std::pair<int, std::vector<vert>>> generateSP (
+    const weighted_graph<int>&, const vertptr);
+
+template<>
+inline std::map<vertptr, std::pair<int, std::vector<vert>>> generateSP<Bellman_Ford> (
+    const weighted_graph<int>& Graph, const vertptr Source)
+{
+    using wedge = weighted_graph<int>::wedge;
+    const int countV = Graph.sizeV();
+
+    // init single source
+    const int int_max = std::numeric_limits<int>::max();
+    std::vector<int> estimates (countV, int_max);
+    std::vector<vertptr> preds (countV, nullptr); // predecessor of each vert
+    estimates[*Source] = 0;
+
+    // main loop
+    for (int i = {0}; i < countV - 1; ++i) {
+        // relaxation
+        for (const wedge& E : Graph.m_Edges) {
+            // sou ---> tar
+            int& sou_est = estimates[*E.sou];
+            int& tar_est = estimates[*E.tar];
+            bool is_need_relax = (sou_est < int_max) && (tar_est > sou_est + E.wei);
+
+            if (is_need_relax) {
+                tar_est = sou_est + E.wei;
+                preds[*E.tar] = E.sou;
+            }
+#if flag_reverse_edge
+            // tar ---> sou
+            if (estimates[*E.sou] < estimates[*E.tar] + E.wei) { // s < t+w is always true
+                estimates[*E.sou] = estimates[*E.tar] + E.wei;
+                preds[*E.tar] = E.sou;
+            }
+#endif
+        }
+    }
+    // check a negative loop
+    for (const wedge& E : Graph.m_Edges) {
+        // sou ---> tar
+        assert(estimates[*E.tar] <= estimates[*E.sou] + E.wei);
+#if flag_reverse_edge
+        // tar ---> sou
+        if (estimates[*E.sou] < estimates[*E.tar] + E.wei) {
+            return false;
+        }
+#endif
+    }
+    // generate result
+    std::map<vertptr, std::pair<int, std::vector<vert>>> general_res;
+    for(int i = {0}; i < countV; ++i) {
+        std::pair<int, std::vector<vert>> dis_path { estimates[i], generate_path_(preds, Source, Graph.m_Verts[i]) };
+        general_res.emplace(Graph.m_Verts[i], dis_path);
+    }
+    return general_res;
+}
+
+inline void generateSP_print (const std::map<vertptr, std::pair<int, std::vector<vert>>>& map, vertptr Source)
+{
+    std::cout << "\n===== All Shortest Ways, source: " << *Source << " ====\n";
+    for (const auto& el : map) {
+        auto path = el.second.second;
+        std::cout << el.first << " --> " << *el.first << ", distance:" << el.second.first;
+        std::cout << " { ";
+        for (const auto& v : path) {
+            std::cout << v << " ";
+        }
+        std::cout << "}\n";
+    }
+}
 
 
 
