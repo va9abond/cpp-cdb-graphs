@@ -6,24 +6,70 @@
 #include "graph_algo.hpp"
 
 
-namespace msl { // ==== msl begin ====
-
-template<
-    template <class... > class _Container_t,
-    class _Value_t
->
-void print (const _Container_t<_Value_t>& Cont) {
-    auto It = Cont.begin(); std::cout << "\n" << "{ ";
-    while (It != Cont.end()) {
-        std::cout << *(It++) << " ";
+namespace msl
+{
+    template<
+        template <class... > class _Container_t,
+        class _Value_t
+    >
+    void print (const _Container_t<_Value_t>& Cont)
+    {
+        auto It = Cont.begin(); std::cout << "\n" << "{ ";
+        while (It != Cont.end()) {
+            std::cout << *(It++) << " ";
+        }
+        std::cout << "};\n";
     }
-    std::cout << "};\n";
 }
 
-} // ==== msl end ====
+
+template <
+    MST_Algo_t algo_t
+>
+void minimal_spanning_tree_presentation (const weighted_graph<int>& Graph)
+{
+    weighted_graph<int> MST = generateMST<MST_Algo_t::Kruskal>(Graph);
+    print(MST); std::cout << "\n";
+}
 
 
-int main() {
+template <
+    SP_Algo_t algo_t
+>
+void shortest_path_presentation (const weighted_graph<int>& Graph)
+{
+    vertptr startV = Graph.m_Verts[0];
+    auto res = generateSP<algo_t>(Graph, startV);
+    generateSP_print(res, startV);
+}
+
+
+void DFS_presentation (const weighted_graph<int>& Graph)
+{
+    DFSprint(Graph);
+    weighted_graph<int> MST = generateMST<MST_Algo_t::Kruskal>(Graph);
+    DFSprint(MST);
+}
+
+
+int main()
+{
+    weighted_graph<int> Graph ("weight_func.txt");
+    print(Graph);
+
+    // task 3.1
+    std::cout << "\n==== task 3.1 ====";
+    minimal_spanning_tree_presentation<MST_Algo_t::Kruskal>(Graph);
+
+    // task 3.2
+    std::cout << "\n\n==== task 3.2 ====";
+    DFS_presentation(Graph);
+
+    // task 3.3
+    std::cout << "\n\n==== task 3.3 ====";
+    shortest_path_presentation<SP_Algo_t::Bellman_Ford>(Graph);
+
+
     // weighted_graph<int> graph { "weight_func.txt" };
     // std::vector<std::vector<int>> vvi = generate_2dvector_from_file("weight_func.txt");
     // for (const std::vector<int> &vi : vvi) {
@@ -98,21 +144,13 @@ int main() {
     // }
 
 
-    weighted_graph<int> Graph ("weight_func.txt");
-    // print(Graph);
 
-    weighted_graph<int> MST = generateMST<Kruskal>(Graph);
-    // print(MST); std::cout << "\n";
 
     // DFSprint(Graph);
     // DFSprint(MST);
 
 
-    vertptr startV = Graph.m_Verts[0];
-    auto res = generateSP<Bellman_Ford>(Graph, startV);
-    generateSP_print(res, startV);
 
-    //
     // for (auto Vit = DFSresult.begin(); Vit != DFSresult.end(); ++Vit) {
         // std::cout << "\n" << (*Vit) << " ";
     // }
