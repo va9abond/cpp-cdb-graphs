@@ -1,11 +1,3 @@
-// [TODO]: is_tree (связность + ацикличность)
-// [TODO]: Back removing
-// [TODO]: Prima
-// [TODO]: Boruvka
-//
-// [TODO]: make min ostov
-
-
 #ifndef GRAPHALGO_HPP
 #define GRAPHALGO_HPP
 
@@ -93,7 +85,7 @@
     // }
 // }
 
-enum MST_Algo_t {
+enum class MST_Algo_t {
     Prim,
     Kruskal
 };
@@ -104,7 +96,7 @@ template <
 inline weighted_graph<int> generateMST (const weighted_graph<int>& Graph);
 
 template <> // template specialization when MST generating by Kruskal's algorithm
-inline weighted_graph<int> generateMST<Kruskal> (const weighted_graph<int>& Graph) {
+inline weighted_graph<int> generateMST<MST_Algo_t::Kruskal> (const weighted_graph<int>& Graph) {
     int countV = Graph.sizeV();
 
     int MSTcountE = 0;
@@ -142,6 +134,11 @@ template <
     class Weight_t
 > void print (const weighted_graph<Weight_t>& Graph) {
     std::cout << "\nGraph: |V| = " << Graph.sizeV() << ", |E| = " << Graph.sizeE() << "\n";
+
+    for (const auto& V : Graph.m_Verts) {
+        std::cout << V << " <--- " << *V << "\n";
+    }
+
     for (auto Eit = Graph.m_Edges.begin(); Eit != Graph.m_Edges.end(); ++Eit) {
         // std::cout << "hello";
         std::cout << "source: " << *(*Eit).sou << ";  target: " << *(*Eit).tar << " [" << (*Eit).wei << "]\n";
@@ -188,7 +185,7 @@ inline void DFSprint (const weighted_graph<int>& Graph)
 
 
 // ==== shortest-path problem algorithm type ====
-enum SP_Algo_t
+enum class SP_Algo_t
 {
     Bellman_Ford,
 };
@@ -224,7 +221,7 @@ inline std::map<vertptr, std::pair<int, std::vector<vert>>> generateSP (
     const weighted_graph<int>&, const vertptr);
 
 template<>
-inline std::map<vertptr, std::pair<int, std::vector<vert>>> generateSP<Bellman_Ford> (
+inline std::map<vertptr, std::pair<int, std::vector<vert>>> generateSP<SP_Algo_t::Bellman_Ford> (
     const weighted_graph<int>& Graph, const vertptr Source)
 {
     using wedge = weighted_graph<int>::wedge;
@@ -269,6 +266,7 @@ inline std::map<vertptr, std::pair<int, std::vector<vert>>> generateSP<Bellman_F
         }
 #endif
     }
+
     // generate result
     std::map<vertptr, std::pair<int, std::vector<vert>>> general_res;
     for(int i = {0}; i < countV; ++i) {
@@ -283,7 +281,7 @@ inline void generateSP_print (const std::map<vertptr, std::pair<int, std::vector
     std::cout << "\n===== All Shortest Ways, source: " << *Source << " ====\n";
     for (const auto& el : map) {
         auto path = el.second.second;
-        std::cout << el.first << " --> " << *el.first << ", distance:" << el.second.first;
+        std::cout << el.first << " <--- " << *el.first << ", distance:" << el.second.first;
         std::cout << " { ";
         for (const auto& v : path) {
             std::cout << v << " ";
@@ -293,8 +291,21 @@ inline void generateSP_print (const std::map<vertptr, std::pair<int, std::vector
 }
 
 
+// ==== maximum flow problem algorithm type ====
+#if 0
+enum class MF_Algo_t
+{
+    Ford_Fulkerson,
+};
+
+struct maximum_flow_problem
+{
+    // construct
 
 
 
+    // output
+};
+#endif
 
 #endif // GRAPHALGO_HPP
