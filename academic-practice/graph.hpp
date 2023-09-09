@@ -193,7 +193,7 @@ private:
     // construct edges by weight function
     void Construct_edges() noexcept {
         for (int i {0}; i < Mybase::sizeV(); ++i) {
-            for (int j {i + 1}; j < Mybase::sizeV(); ++j) {
+            for (int j {0}; j < Mybase::sizeV(); ++j) {
                 weight_type weight = m_Weightfunc[i][j];
                 // std::cout << "i = " << i << ", j = " << j << "  [i][j] = " << m_Weightfunc[i][j]; // (c)
                 if (weight) { // verts i and j are connected

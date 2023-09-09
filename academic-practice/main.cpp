@@ -38,7 +38,7 @@ template <
 >
 void shortest_path_presentation (const weighted_graph<int>& Graph)
 {
-    vertptr startV = Graph.m_Verts[0];
+    vertptr startV = Graph.m_Verts[7];
     auto res = generateSP<algo_t>(Graph, startV);
     generateSP_print(res, startV);
 }

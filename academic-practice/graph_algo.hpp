@@ -11,58 +11,6 @@
 #include "dsf.hpp"
 
 
-// template <
-//     class Graph_t
-// >
-// inline void BFSvoid (const Graph_t& Graph, int Vstart = 1) {
-//     std::queue<int> Queue;
-//     std::set<int> Visited;
-//
-//     Queue.push(Vstart);
-//     Visited.insert(Vstart);
-//
-//     while (!Queue.empty())
-//     {
-//         int Vnow = Queue.front();
-//         const std::vector<int>& Neighbours = Graph[Vnow];
-//
-//         for (int Vnext {1}; Vnext <= Neighbours.size(); ++Vnext)
-//         {
-//             if (Neighbours[Vnext - 1]) { // Vnow connected with Vnext
-//                 if (Visited.find(Vnext) != Visited.end()) {
-//                     Visited.insert(Vnext);
-//                     Queue.push(Vnext);
-//                 }
-//             }
-//         }
-//         Queue.pop();
-//     }
-// }
-
-
-// template <
-//     class Graph_t
-// >
-// inline void DFSvoid (
-//     const Graph_t& Graph,
-//     int Vnow, // [TODO]: Vnow is Visited.front() always??
-//     std::set<int>& Visited
-// ) {
-//     // std::set<int> Visited;
-//     const std::vector<int>& Neighbours = Graph[Vnow];
-//
-//     for (int Vnext {1}; Vnext <= Neighbours.size(); ++Vnext) {
-//        if (Neighbours[Vnext - 1]) { // Vnow connected with Vnex
-//             if (Visited.find(Vnext) != Visited.end()) {
-//                 // Vnext doesn't be visited before
-//                 Visited.insert(Vnext);
-//                 DFS(Graph, Vnext, Visited);
-//             }
-//         }
-//     }
-// }
-
-
 // ==== minimal-spanning-tree problem ====
 // [pseudocode]: generate Minimal Spannig Tree
 // inline weighted_graph<int> generic_MST (const weighted_graph<int>& Graph) {
@@ -136,11 +84,10 @@ template <
     std::cout << "\nGraph: |V| = " << Graph.sizeV() << ", |E| = " << Graph.sizeE() << "\n";
 
     for (const auto& V : Graph.m_Verts) {
-        std::cout << V << " <--- " << *V << "\n";
+        std::cout << "(" << V << ") " << *V << "\n";
     }
 
     for (auto Eit = Graph.m_Edges.begin(); Eit != Graph.m_Edges.end(); ++Eit) {
-        // std::cout << "hello";
         std::cout << "source: " << *(*Eit).sou << ";  target: " << *(*Eit).tar << " [" << (*Eit).wei << "]\n";
     }
 }
@@ -178,7 +125,7 @@ inline void DFSprint (const weighted_graph<int>& Graph)
     std::vector<vertptr> DFSresult = DFSprint_init(Graph);
     std::cout << "\n" << "{\n";
     for (const auto& V : DFSresult) {
-        std::cout << "    " << *V << "  " << V << "\n";
+        std::cout << "    (" << V << ")  " << *V << "\n";
     }
     std::cout << "};";
 }
@@ -189,15 +136,6 @@ enum class SP_Algo_t
 {
     Bellman_Ford,
 };
-
-#if 0
-inline void init_single_source (const weighted_graph<int>& Graph, const vertptr Source)
-{
-    std::vector<int> estimates(Graph.sizeV(), std::numeric_limits<int>::max());
-    std::vector<vertptr> predecessors(Graph.sizeV(), nullptr);
-    estimates[*Source] = 0;
-}
-#endif
 
 inline std::vector<vert> generate_path_ (std::vector<vertptr>& Preds, const vertptr Source, vertptr Target)
 {
@@ -237,7 +175,6 @@ inline std::map<vertptr, std::pair<int, std::vector<vert>>> generateSP<SP_Algo_t
     for (int i = {0}; i < countV - 1; ++i) {
         // relaxation
         for (const wedge& E : Graph.m_Edges) {
-            // sou ---> tar
             int& sou_est = estimates[*E.sou];
             int& tar_est = estimates[*E.tar];
             bool is_need_relax = (sou_est < int_max) && (tar_est > sou_est + E.wei);
@@ -246,25 +183,12 @@ inline std::map<vertptr, std::pair<int, std::vector<vert>>> generateSP<SP_Algo_t
                 tar_est = sou_est + E.wei;
                 preds[*E.tar] = E.sou;
             }
-#if flag_reverse_edge
-            // tar ---> sou
-            if (estimates[*E.sou] < estimates[*E.tar] + E.wei) { // s < t+w is always true
-                estimates[*E.sou] = estimates[*E.tar] + E.wei;
-                preds[*E.tar] = E.sou;
-            }
-#endif
         }
     }
     // check a negative loop
     for (const wedge& E : Graph.m_Edges) {
         // sou ---> tar
         assert(estimates[*E.tar] <= estimates[*E.sou] + E.wei);
-#if flag_reverse_edge
-        // tar ---> sou
-        if (estimates[*E.sou] < estimates[*E.tar] + E.wei) {
-            return false;
-        }
-#endif
     }
 
     // generate result
@@ -281,7 +205,7 @@ inline void generateSP_print (const std::map<vertptr, std::pair<int, std::vector
     std::cout << "\n===== All Shortest Ways, source: " << *Source << " ====\n";
     for (const auto& el : map) {
         auto path = el.second.second;
-        std::cout << el.first << " <--- " << *el.first << ", distance:" << el.second.first;
+        std::cout << "(" << el.first << ") " << *el.first << ", distance:" << el.second.first;
         std::cout << " { ";
         for (const auto& v : path) {
             std::cout << v << " ";
