@@ -292,12 +292,11 @@ inline void generateSP_print (const std::map<vertptr, std::pair<int, std::vector
 
 
 // ==== maximum flow problem algorithm type ====
-#if 0
 enum class MF_Algo_t
 {
-    Ford_Fulkerson,
+    basic_Ford_Fulkerson,
 };
-
+// residual network
 struct maximum_flow_problem
 {
     // construct
@@ -306,6 +305,5 @@ struct maximum_flow_problem
 
     // output
 };
-#endif
 
 #endif // GRAPHALGO_HPP
