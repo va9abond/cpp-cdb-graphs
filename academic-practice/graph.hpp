@@ -150,7 +150,9 @@ struct weighted_graph : Graph_base_ {
     using weight_type = Weight_t;
     using size_type   = Mybase::size_type;
     using vert        = Mybase::vert;
+    using vertptr     = Mybase::vertptr;
     using wedge       = edge<weight_type>;
+    // using Mybase::Mybase;
 
     // generate graph with Count verts and zero weight function
     // Graph = { verts:Count, wedges:0,  weight_funct==0 }
@@ -195,12 +197,9 @@ private:
         for (int i {0}; i < Mybase::sizeV(); ++i) {
             for (int j {0}; j < Mybase::sizeV(); ++j) {
                 weight_type weight = m_Weightfunc[i][j];
-                // std::cout << "i = " << i << ", j = " << j << "  [i][j] = " << m_Weightfunc[i][j]; // (c)
                 if (weight) { // verts i and j are connected
-                    // std::cout << " +"; // (c)
                     m_Edges.emplace(m_Verts[i], m_Verts[j], weight);
                 }
-                // std::cout << "\n"; // (c)
             }
         }
     }
@@ -213,6 +212,93 @@ public:
     // [NOTE]: strict order by wedge::operator<
 };
 
+#if 1
+template <
+    class Weight_t
+>
+struct residual_network : weighted_graph<Weight_t> // flow_network
+{
+    using Mybase      = weighted_graph<Weight_t>;
+    using weight_type = Weight_t;
+    using size_type   = typename Mybase::size_type;
+    using vert        = typename Mybase::vert;
+    using vertptr     = typename Mybase::vertptr;
+    using wedge       = edge<weight_type>;
+
+
+    // generate flow
+    // [WARNING]: parallelization of edges:
+    //            if there are (sou --> tar and tar --> sou) then
+    //            tar --> sou converts to tar --> new_vert --> sou
+    residual_network (const weighted_graph<weight_type>& Rhs) :
+        Mybase(Edges_parallelization(Rhs.m_Weightfunc)) // construct weighted_graph with new weight_funct
+    {}
+
+private:
+    std::vector<std::vector<int>> Edges_parallelization (const std::vector<std::vector<int>>& dvec) noexcept
+    {
+        using index_t = std::vector<std::vector<int>>::size_type;
+
+        index_t countV = dvec.size();
+        index_t last_index = countV - 1;
+        std::vector<std::vector<int>> Result(dvec);
+
+        for (index_t i = {0}; i < countV - 1; ++i) {
+            for (index_t j = {i+1}; j < countV; ++j) {
+                weight_type weight = dvec[i][j];
+                weight_type weight_reverse = dvec[j][i];
+
+                if (weight && weight_reverse) {                                  // sou -> tar AND tar -> sou
+                    Result[j][i] = 0;                                            // destroy: tar -> sou
+                    Result.push_back(std::vector<weight_type>(++last_index, 0)); // create:  new vert with no connects
+                    Result.back()[i] = weight_reverse;                           // create: new_vert -> sou
+
+                    for (index_t k = {0}; k < Result.size(); ++k) {
+                        Result[k].push_back(0);                                  // disconnect others witch new_vert
+                    }
+
+                    Result[j][last_index] = weight_reverse;                      // create:: tar->new_vert
+                }
+            }
+        }
+        return Result;
+    }
+#if 0
+    // [REJECTED]: vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    // construct edges by weight function + parallelization
+    // [WARNING]: this function makes Mybase::m_Weightfunc not relevant
+    void Construct_edges() noexcept
+    {
+        std::vector<std::pair<vertptr, vertptr>> edges_reverse(0);
+        int count_reverse_edges = 0;
+
+        for (int i {0}; i < Mybase::sizeV() - 1; ++i) {
+            for (int j {i+1}; j < Mybase::sizeV(); ++j) {
+                weight_type weight = Mybase::m_Weightfunc[i][j];
+                weight_type weight_reverse = Mybase::m_Weightfunc[j][i];
+
+                vertptr Source = Mybase::m_Verts[i];
+                vertptr Target = Mybase::m_Verts[j];
+                // I don't know how to program
+                if (weight && weight_reverse) {
+                    Mybase::m_Edges.emplace(Source, Target, weight);
+                    Mybase::add_n_verts(1); // verst always add in end
+                    vertptr new_vert = Mybase::m_Verts.back();
+                    Mybase::m_Edges.emplace(Target, new_vert, weight_reverse);
+                    Mybase::m_Edges.emplace(new_vert, Source, weight_reverse);
+                } else if (weight) {
+                    Mybase::m_Edges.emplace(Source, Target, weight);
+                } else if (weight_reverse) {
+                    Mybase::m_Edges.emplace(Target, Source, weight_reverse);
+                }
+            }
+        }
+    }
+#endif
+// public:
+    // std::vector<std::vector<weight_type>> flow;
+};
+#endif
 
 // no weights on edges, just 1 if i, j verts connected, else 0
 struct general_graph : weighted_graph<bool> {};

@@ -92,7 +92,6 @@ template <
     }
 }
 
-
 inline void DFSprint_main (const weighted_graph<int>& Graph, const vert* Vnow, std::vector<vert>& Visited, std::vector<vertptr>& Vindxs) {
     Visited[*Vnow] = 1;
     std::vector<int> weightNbrs { Graph.m_Weightfunc[*Vnow] }; // weights of edges with nbrs
@@ -103,7 +102,6 @@ inline void DFSprint_main (const weighted_graph<int>& Graph, const vert* Vnow, s
         }
     }
 }
-
 
 inline std::vector<vertptr> DFSprint_init (const weighted_graph<int>& Graph) {
     int countV = Graph.sizeV();
@@ -220,14 +218,37 @@ enum class MF_Algo_t
 {
     basic_Ford_Fulkerson,
 };
-// residual network
-struct maximum_flow_problem
-{
-    // construct
+
+template <
+    MF_Algo_t algo_t
+>
+inline weighted_graph<int> generateMF (
+    const weighted_graph<int>&, const vertptr, const vertptr
+);
+
+// template <>
+// inline weighted_graph<int> generateMF<MF_Algo_t::basic_Ford_Fulkerson> (
+//     const weighted_graph<int>& Graph, const vertptr Source, const vertptr Target
+// ) {
+//     using wedge = weighted_graph<int>::wedge;
+//     const int countV = Graph.sizeV();
+//
+//     // init residual network
+//     // fill residual network with start values
+//
+//     // while (true)
+//     // find augmenting path from Source to Target
+//     // flag = (is path exist ? true : false)
+//     // if (!flag) break;
+//     // choose cf(p)
+//     // for each edge in path
+//     //      if edge in m_Edges
+//     //          increase flow in residual network
+//     //      else
+//     //          
+// }
 
 
 
-    // output
-};
 
 #endif // GRAPHALGO_HPP

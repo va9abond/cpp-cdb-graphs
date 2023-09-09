@@ -57,6 +57,7 @@ int main()
     weighted_graph<int> Graph ("weight_func.txt");
     print(Graph);
 
+#if 0
     // task 3.1
     std::cout << "\n==== task 3.1 ====";
     minimal_spanning_tree_presentation<MST_Algo_t::Kruskal>(Graph);
@@ -69,6 +70,10 @@ int main()
     std::cout << "\n\n==== task 3.3 ====";
     shortest_path_presentation<SP_Algo_t::Bellman_Ford>(Graph);
 
+#endif
+
+    residual_network<int> net(Graph);
+    print(net);
 
     // weighted_graph<int> graph { "weight_func.txt" };
     // std::vector<std::vector<int>> vvi = generate_2dvector_from_file("weight_func.txt");
