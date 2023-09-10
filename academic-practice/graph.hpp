@@ -156,9 +156,7 @@ struct weighted_graph : Graph_base_ {
 
     // generate graph with Count verts and zero weight function
     // Graph = { verts:Count, wedges:0,  weight_funct==0 }
-    weighted_graph (int Count) : Graph_base_(Count) {
-        m_Weightfunc = std::vector<std::vector<int>>(Count, std::vector<int>(Count, 0));
-    }
+    weighted_graph (int Count) : Graph_base_(Count), m_Weightfunc(Count, std::vector<int>(Count, 0)) {}
 
     // generate graph with weight function from file
     weighted_graph (std::string Filename) : Graph_base_() {
@@ -212,7 +210,6 @@ public:
     // [NOTE]: strict order by wedge::operator<
 };
 
-#if 1
 template <
     class Weight_t
 >
@@ -231,13 +228,43 @@ struct residual_network : weighted_graph<Weight_t> // flow_network
     //            if there are (sou --> tar and tar --> sou) then
     //            tar --> sou converts to tar --> new_vert --> sou
     residual_network (const weighted_graph<weight_type>& Rhs) :
-        Mybase(Edges_parallelization(Rhs.m_Weightfunc)) // construct weighted_graph with new weight_funct
-    {}
+        Mybase(Edges_parallelization(Rhs.m_Weightfunc)), // construct weighted_graph with new weight_funct
+        m_Flow(Mybase::m_Weightfunc.size(), std::vector<int>(Mybase::m_Weightfunc.size(), 0)), // init flow as 0
+        m_Capacity(Mybase::m_Weightfunc.size(), std::vector<int>(Mybase::m_Weightfunc.size(), 0)) // init capacity
+    {
+        update_capacity();
+    }
+
+    void update_capacity() noexcept
+    {
+        using index_t = typename std::vector<std::vector<weight_type>>::size_type;
+
+        index_t countV = Mybase::m_Weightfunc.size();
+        const auto& M = Mybase::m_Weightfunc;
+
+        for (index_t i = {0}; i < countV - 1; ++i) {
+            for (index_t j = {0}; j < countV; ++j) {
+                weight_type weight = M[i][j];
+                weight_type weight_reverse = M[j][i];
+                m_Capacity[i][j] = (weight != 0) * (weight - m_Flow[i][j]) + // i -> j
+                                   (weight_reverse != 0) * (m_Flow[j][i])  + // not i -> j, but j -> i
+                                    0;                                       // not i -> j, not j -> i
+                // ^^^^ equivalent to vvvv
+                // if (weight) {
+                //     m_Capacity[i][j] = weight - m_Flow[i][j];
+                // } else if (weight_reverse) {
+                //     m_Capacity[i][j] = m_Flow[j][i];
+                // } else {
+                //     m_Capacity[i][j] = 0;
+                // }
+            }
+        }
+    }
 
 private:
     std::vector<std::vector<int>> Edges_parallelization (const std::vector<std::vector<int>>& dvec) noexcept
     {
-        using index_t = std::vector<std::vector<int>>::size_type;
+        using index_t = typename std::vector<std::vector<weight_type>>::size_type;
 
         index_t countV = dvec.size();
         index_t last_index = countV - 1;
@@ -295,10 +322,10 @@ private:
         }
     }
 #endif
-// public:
-    // std::vector<std::vector<weight_type>> flow;
+public:
+    std::vector<std::vector<weight_type>> m_Flow;     // resulting flow
+    std::vector<std::vector<weight_type>> m_Capacity; // residual capacity
 };
-#endif
 
 // no weights on edges, just 1 if i, j verts connected, else 0
 struct general_graph : weighted_graph<bool> {};
