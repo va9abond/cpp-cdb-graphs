@@ -11,28 +11,6 @@
 #include "dsf.hpp"
 
 
-// ==== minimal-spanning-tree problem ====
-// [pseudocode]: generate Minimal Spannig Tree
-// inline weighted_graph<int> generic_MST (const weighted_graph<int>& Graph) {
-    // 0. init MST {Graph.m_Verts, empty_set};
-    // 1. Choose random vert and insert it in MST.m_Verts
-    // 2. while (MST is not Spanning Tree) {
-    //        cutGraph = cutting_graph(respect wirh MST.m_Verts)
-    //        find_all_safe_edges() {
-    //            for (vi : Graph.m_Verts) {
-    //                for (vj : Graph.m_Verts) {
-    //                    if (vi in cutGraph.m_Verts && vj in Graph.m_Verts && vj not in cutGraph.m_Verts) {
-    //                              edge e {vi, vj} is safe;
-    //                              add e in safe_set
-    //                    }
-    //                }
-    //            }
-    //        };
-    //        choose light edge from all sefe
-    //        add safe edge to MST
-    // }
-// }
-
 enum class MST_Algo_t {
     Prim,
     Kruskal
@@ -222,31 +200,36 @@ enum class MF_Algo_t
 template <
     MF_Algo_t algo_t
 >
-inline weighted_graph<int> generateMF (
+inline std::vector<std::vector<int>> generateMF (
     const weighted_graph<int>&, const vertptr, const vertptr
 );
 
-// template <>
-// inline weighted_graph<int> generateMF<MF_Algo_t::basic_Ford_Fulkerson> (
-//     const weighted_graph<int>& Graph, const vertptr Source, const vertptr Target
-// ) {
-//     using wedge = weighted_graph<int>::wedge;
-//     const int countV = Graph.sizeV();
-//
-//     // init residual network
-//     // fill residual network with start values
-//
-//     // while (true)
-//     // find augmenting path from Source to Target
-//     // flag = (is path exist ? true : false)
-//     // if (!flag) break;
-//     // choose cf(p)
-//     // for each edge in path
-//     //      if edge in m_Edges
-//     //          increase flow in residual network
-//     //      else
-//     //          
-// }
+template <>
+inline std::vector<std::vector<int>> generateMF<MF_Algo_t::basic_Ford_Fulkerson> (
+    const weighted_graph<int>& Graph, const vertptr Source, const vertptr Target
+) {
+    using index_t = residual_network<int>::index_t;
+    // using wedge = weighted_graph<int>::wedge;
+    // const int countV = Graph.sizeV();
+
+    residual_network<int> Rnetwork(Graph); // init residual network; now: zero flow
+    auto path = Rnetwork.find_path(Source, Target);
+
+    while (path.first) {
+        for (index_t i = {0}; i < path.second.size() - 1; ++i) {
+            vertptr s = path.second[i];
+            vertptr t = path.second[i+1];
+            if (Rnetwork.m_Weightfunc[*s][*t]) {
+                Rnetwork.m_Flow[*s][*t] += path.first;
+            } else {
+                Rnetwork.m_Flow[*t][*s] -= path.first;
+            }
+        }
+        Rnetwork.update_capacity();
+        path = Rnetwork.find_path(Source, Target);
+    }
+    return Rnetwork.m_Flow;
+}
 
 
 
