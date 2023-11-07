@@ -72,8 +72,34 @@ int main()
 
 #endif
 
-    residual_network<int> net(Graph);
-    print(net);
+    // residual_network<int> net(Graph);
+    // print(net);
+
+    // shortest_path_presentation<SP_Algo_t::Bellman_Ford>(net::Mybase);
+
+    // auto path = net.find_path(net.m_Verts[7], net.m_Verts[2]);
+#if 0
+    auto flow = generateMF<MF_Algo_t::basic_Ford_Fulkerson> (Graph, Graph.m_Verts[0], Graph.m_Verts[11]);
+
+    std::cout << "\n{";
+    for (const auto& verts : flow) {
+        std::cout << "\n{ ";
+        for (const auto& flow_ : verts) {
+            std::cout << flow_ << " ";
+        }
+        std::cout << "}\n";
+    }
+    std::cout << "}\n";
+#endif
+    // auto& p = path.second;
+    // std::cout << "\n{ ";
+    // for (const auto& Vptr : p) {
+    //     std::cout << *Vptr << " ";
+    // }
+    // std::cout << "}\n";
+
+    // net.
+    // print(net.m_Flow);
 
     // weighted_graph<int> graph { "weight_func.txt" };
     // std::vector<std::vector<int>> vvi = generate_2dvector_from_file("weight_func.txt");
