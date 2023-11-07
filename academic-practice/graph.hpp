@@ -5,11 +5,13 @@
 #include <iostream>
 #include <cassert>
 #include <limits>
+#include <algorithm>
+#include <queue>
 #include "vector_utils.hpp"
 
 // [TODO]: different ways to store graph
 // [TODO]: tree is derived class from Grap_base_ with static_assert(is_tree);
-
+// [TODO]: add proxy to verify is vertice in given graph
 
 struct edge_base_ {
     // +---------------------------------------------------------+
@@ -221,6 +223,7 @@ struct residual_network : weighted_graph<Weight_t> // flow_network
     using vert        = typename Mybase::vert;
     using vertptr     = typename Mybase::vertptr;
     using wedge       = edge<weight_type>;
+    using index_t     = typename std::vector<std::vector<weight_type>>::size_type;
 
 
     // generate flow
@@ -237,8 +240,6 @@ struct residual_network : weighted_graph<Weight_t> // flow_network
 
     void update_capacity() noexcept
     {
-        using index_t = typename std::vector<std::vector<weight_type>>::size_type;
-
         index_t countV = Mybase::m_Weightfunc.size();
         const auto& M = Mybase::m_Weightfunc;
 
@@ -261,11 +262,15 @@ struct residual_network : weighted_graph<Weight_t> // flow_network
         }
     }
 
+    decltype(auto) find_path (vertptr Source, vertptr Target) noexcept
+    {
+        return bfs(Source, Target);
+    }
+
+
 private:
     std::vector<std::vector<int>> Edges_parallelization (const std::vector<std::vector<int>>& dvec) noexcept
     {
-        using index_t = typename std::vector<std::vector<weight_type>>::size_type;
-
         index_t countV = dvec.size();
         index_t last_index = countV - 1;
         std::vector<std::vector<int>> Result(dvec);
@@ -290,38 +295,64 @@ private:
         }
         return Result;
     }
-#if 0
-    // [REJECTED]: vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    // construct edges by weight function + parallelization
-    // [WARNING]: this function makes Mybase::m_Weightfunc not relevant
-    void Construct_edges() noexcept
+
+    // [TODO]: 3 nested if!!!
+#if 1
+    decltype(auto) bfs (vertptr Source, vertptr Target) noexcept
     {
-        std::vector<std::pair<vertptr, vertptr>> edges_reverse(0);
-        int count_reverse_edges = 0;
+        auto countV = Graph_base_::m_Verts.size();
+        std::vector<vertptr> Parents(countV, nullptr);
+        std::vector<bool>    Visited(countV, 0);
+        bool                 is_find_path = false;
 
-        for (int i {0}; i < Mybase::sizeV() - 1; ++i) {
-            for (int j {i+1}; j < Mybase::sizeV(); ++j) {
-                weight_type weight = Mybase::m_Weightfunc[i][j];
-                weight_type weight_reverse = Mybase::m_Weightfunc[j][i];
+        std::queue<vertptr> Queue;
+        Queue.push(Source);
+        Visited[*Source] = true;
+        Parents[*Source] = nullptr;
 
-                vertptr Source = Mybase::m_Verts[i];
-                vertptr Target = Mybase::m_Verts[j];
-                // I don't know how to program
-                if (weight && weight_reverse) {
-                    Mybase::m_Edges.emplace(Source, Target, weight);
-                    Mybase::add_n_verts(1); // verst always add in end
-                    vertptr new_vert = Mybase::m_Verts.back();
-                    Mybase::m_Edges.emplace(Target, new_vert, weight_reverse);
-                    Mybase::m_Edges.emplace(new_vert, Source, weight_reverse);
-                } else if (weight) {
-                    Mybase::m_Edges.emplace(Source, Target, weight);
-                } else if (weight_reverse) {
-                    Mybase::m_Edges.emplace(Target, Source, weight_reverse);
+        while (!is_find_path && !Queue.empty()) {
+            vertptr Vnow = Queue.front();
+            Visited[*Vnow] = true;
+
+            std::vector<vert> Nbrs = m_Capacity[*Vnow];
+            for (index_t nbrNo = {0}; nbrNo < Nbrs.size(); ++nbrNo) {
+                weight_type ci = Nbrs[nbrNo]; // capacity
+                if (ci) { // capacity != 0
+                    Parents[nbrNo] = Vnow;
+                    if (!Visited[nbrNo]) {
+                        if ((int)nbrNo == *Target) {
+                            is_find_path = true; break;
+                        } else {
+                            Queue.push(Mybase::m_Verts[nbrNo]);
+                        }
+                    }
                 }
             }
+            Queue.pop();
         }
+
+        std::vector<vertptr> Path(0);
+        weight_type min_capacity = (is_find_path ? std::numeric_limits<weight_type>::max() : 0);
+        if (is_find_path) {
+            vertptr Vnow = Target;
+
+            while (Vnow != nullptr) {
+                Path.push_back(Vnow);
+                vertptr Vparent = Parents[*Vnow];
+                // std::cout << "\n=======" << *Vparent;
+                if (Vparent) {
+                    min_capacity = (min_capacity > m_Capacity[*Vparent][*Vnow] ? m_Capacity[*Vparent][*Vnow] : min_capacity);
+
+                }
+
+                Vnow = Vparent;
+            }
+            std::reverse(Path.begin(), Path.end());
+        }
+        return std::make_pair(min_capacity, Path);
     }
 #endif
+
 public:
     std::vector<std::vector<weight_type>> m_Flow;     // resulting flow
     std::vector<std::vector<weight_type>> m_Capacity; // residual capacity
@@ -333,7 +364,7 @@ struct general_graph : weighted_graph<bool> {};
 
 // all edges have source and target
 template <
-    class Weight_t
+class Weight_t
 >
 struct oriented_graph : weighted_graph<Weight_t> {
     using Mybase      = weighted_graph<Weight_t>;
