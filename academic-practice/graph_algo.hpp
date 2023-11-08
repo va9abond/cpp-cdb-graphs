@@ -55,19 +55,26 @@ inline weighted_graph<int> generateMST<MST_Algo_t::Kruskal> (const weighted_grap
 }
 
 
+// printf "%-10s%-15s%-15s%s\n" "$PID" "$MEMORY" "$MEMPER" "$COMMAND"
 // ==== Graph printing ====
 template <
     class Weight_t
 > void print (const weighted_graph<Weight_t>& Graph) {
-    std::cout << "\nGraph: |V| = " << Graph.sizeV() << ", |E| = " << Graph.sizeE() << "\n";
+    std::cout << "\n========================================\n";
+    std::cout << "Graph: |V| = " << Graph.sizeV() << ", |E| = " << Graph.sizeE() << "\n";
+    std::cout << "========================================\n";
+    printf("%40s\n", "Vertices");
 
     for (const auto& V : Graph.m_Verts) {
         std::cout << "(" << V << ") " << *V << "\n";
     }
 
+    printf("%40s\n", "Edges");
     for (auto Eit = Graph.m_Edges.begin(); Eit != Graph.m_Edges.end(); ++Eit) {
-        std::cout << "source: " << *(*Eit).sou << ";  target: " << *(*Eit).tar << " [" << (*Eit).wei << "]\n";
+        printf("source: %2d; target: %2d; [%d]\n", *(*Eit).sou, *(*Eit).tar, (*Eit).wei);
     }
+    printf("%40s\n", "End");
+    std::cout << "========================================\n";
 }
 
 inline void DFSprint_main (const weighted_graph<int>& Graph, const vert* Vnow, std::vector<vert>& Visited, std::vector<vertptr>& Vindxs) {
@@ -96,8 +103,7 @@ inline std::vector<vertptr> DFSprint_init (const weighted_graph<int>& Graph) {
     return Vindxs;
 }
 
-inline void DFSprint (const weighted_graph<int>& Graph)
-{
+inline void DFSprint (const weighted_graph<int>& Graph) {
     std::vector<vertptr> DFSresult = DFSprint_init(Graph);
     std::cout << "\n" << "{\n";
     for (const auto& V : DFSresult) {
@@ -179,9 +185,10 @@ inline std::map<vertptr, std::pair<int, std::vector<vert>>> generateSP<SP_Algo_t
 inline void generateSP_print (const std::map<vertptr, std::pair<int, std::vector<vert>>>& map, vertptr Source)
 {
     std::cout << "\n===== All Shortest Ways, source: " << *Source << " ====\n";
+    printf("%-20s %s  path \n", "     target ", " dist. ");
     for (const auto& el : map) {
         auto path = el.second.second;
-        std::cout << "(" << el.first << ") " << *el.first << ", distance:" << el.second.first;
+        printf("(%-14p) %2d %4d     ", (void*)el.first, *el.first, el.second.first);
         std::cout << " { ";
         for (const auto& v : path) {
             std::cout << v << " ";

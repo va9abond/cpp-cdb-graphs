@@ -85,7 +85,8 @@ struct edge : edge_base_ {
 
 
 struct Graph_base_ {
-    //                         Traits
+    // +---------------------------------------------------------+
+    // |                       Traits                            |
     // +---------------------------------------------------------+
     /* | */   using vert      = int;                          // |
     /* | */   using vertptr   = vert*;                        // |
@@ -296,7 +297,6 @@ private:
         return Result;
     }
 
-    // [TODO]: 3 nested if!!!
 #if 1
     decltype(auto) bfs (vertptr Source, vertptr Target) noexcept
     {
