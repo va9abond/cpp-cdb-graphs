@@ -182,8 +182,8 @@ inline std::map<vertptr, std::pair<int, std::vector<vert>>> generateSP<SP_Algo_t
     return general_res;
 }
 
-inline void generateSP_print (const std::map<vertptr, std::pair<int, std::vector<vert>>>& map, vertptr Source)
-{
+                                              // It's awful(
+inline void generateSP_print (const std::map<vertptr, std::pair<int, std::vector<vert>>>& map, vertptr Source) {
     std::cout << "\n===== All Shortest Ways, source: " << *Source << " ====\n";
     printf("%-20s %s  path \n", "     target ", " dist. ");
     for (const auto& el : map) {

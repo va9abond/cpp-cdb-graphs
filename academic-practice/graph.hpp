@@ -239,8 +239,7 @@ struct residual_network : weighted_graph<Weight_t> // flow_network
         update_capacity();
     }
 
-    void update_capacity() noexcept
-    {
+    void update_capacity() noexcept {
         index_t countV = Mybase::m_Weightfunc.size();
         const auto& M = Mybase::m_Weightfunc;
 
@@ -263,15 +262,13 @@ struct residual_network : weighted_graph<Weight_t> // flow_network
         }
     }
 
-    decltype(auto) find_path (vertptr Source, vertptr Target) noexcept
-    {
+    decltype(auto) find_path (vertptr Source, vertptr Target) noexcept {
         return bfs(Source, Target);
     }
 
 
 private:
-    std::vector<std::vector<int>> Edges_parallelization (const std::vector<std::vector<int>>& dvec) noexcept
-    {
+    std::vector<std::vector<int>> Edges_parallelization (const std::vector<std::vector<int>>& dvec) noexcept {
         index_t countV = dvec.size();
         index_t last_index = countV - 1;
         std::vector<std::vector<int>> Result(dvec);
@@ -298,8 +295,7 @@ private:
     }
 
 #if 1
-    decltype(auto) bfs (vertptr Source, vertptr Target) noexcept
-    {
+    decltype(auto) bfs (vertptr Source, vertptr Target) noexcept {
         auto countV = Graph_base_::m_Verts.size();
         std::vector<vertptr> Parents(countV, nullptr);
         std::vector<bool>    Visited(countV, 0);
@@ -357,6 +353,7 @@ public:
     std::vector<std::vector<weight_type>> m_Flow;     // resulting flow
     std::vector<std::vector<weight_type>> m_Capacity; // residual capacity
 };
+
 
 // no weights on edges, just 1 if i, j verts connected, else 0
 struct general_graph : weighted_graph<bool> {};
