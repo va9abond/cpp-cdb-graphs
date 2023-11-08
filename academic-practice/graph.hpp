@@ -219,7 +219,7 @@ template <
 struct residual_network : weighted_graph<Weight_t> // flow_network
 {
     using Mybase      = weighted_graph<Weight_t>;
-    using weight_type = Weight_t;
+    using weight_type = typename Mybase::weight_type;
     using size_type   = typename Mybase::size_type;
     using vert        = typename Mybase::vert;
     using vertptr     = typename Mybase::vertptr;
@@ -232,7 +232,7 @@ struct residual_network : weighted_graph<Weight_t> // flow_network
     //            if there are (sou --> tar and tar --> sou) then
     //            tar --> sou converts to tar --> new_vert --> sou
     residual_network (const weighted_graph<weight_type>& Rhs) :
-        Mybase(Edges_parallelization(Rhs.m_Weightfunc)), // construct weighted_graph with new weight_funct
+        Mybase(parallelization(Rhs.m_Weightfunc)), // construct weighted_graph with new weight_funct
         m_Flow(Mybase::m_Weightfunc.size(), std::vector<int>(Mybase::m_Weightfunc.size(), 0)), // init flow as 0
         m_Capacity(Mybase::m_Weightfunc.size(), std::vector<int>(Mybase::m_Weightfunc.size(), 0)) // init capacity
     {
@@ -268,9 +268,9 @@ struct residual_network : weighted_graph<Weight_t> // flow_network
 
 
 private:
-    std::vector<std::vector<int>> Edges_parallelization (const std::vector<std::vector<int>>& dvec) noexcept {
+    std::vector<std::vector<int>> parallelization (const std::vector<std::vector<int>>& dvec) noexcept {
         index_t countV = dvec.size();
-        index_t last_index = countV - 1;
+        index_t new_size = countV;
         std::vector<std::vector<int>> Result(dvec);
 
         for (index_t i = {0}; i < countV - 1; ++i) {
@@ -280,18 +280,17 @@ private:
 
                 if (weight && weight_reverse) {                                  // sou -> tar AND tar -> sou
                     Result[j][i] = 0;                                            // destroy: tar -> sou
-                    Result.push_back(std::vector<weight_type>(++last_index, 0)); // create:  new vert with no connects
+                    Result.push_back(std::vector<weight_type>(++new_size, 0));   // create: vert(new_vert) with no connections
                     Result.back()[i] = weight_reverse;                           // create: new_vert -> sou
 
-                    for (index_t k = {0}; k < Result.size(); ++k) {
-                        Result[k].push_back(0);                                  // disconnect others witch new_vert
+                    for (index_t k = {0}; k < new_size-1; ++k) {                 // resizing vector to size+1
+                        Result[k].push_back(0);                                  // disconnect others with new_vert
                     }
-
-                    Result[j][last_index] = weight_reverse;                      // create:: tar->new_vert
+                    Result[j][new_size-1] = weight_reverse;                      // create: tar->new_vert
                 }
             }
         }
-        return Result;
+        return Result;                                                           // sou -> tar AND tar -> new_vert -> sou
     }
 
 #if 1

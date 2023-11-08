@@ -72,8 +72,8 @@ int main()
 
 #endif
 
-    // residual_network<int> net(Graph);
-    // print(net);
+    residual_network<int> net(Graph);
+    print(net);
 
     // shortest_path_presentation<SP_Algo_t::Bellman_Ford>(net::Mybase);
 
