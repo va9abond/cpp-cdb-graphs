@@ -55,7 +55,21 @@ inline weighted_graph<int> generateMST<MST_Algo_t::Kruskal> (const weighted_grap
 }
 
 
-// printf "%-10s%-15s%-15s%s\n" "$PID" "$MEMORY" "$MEMPER" "$COMMAND"
+// ==== custom less for graph printing ====
+template <
+    class Weight_t
+> bool custom_edge_less (const edge<Weight_t>& Lhs, const edge<Weight_t>& Rhs) {
+    vert s = *Lhs.sou; vert rs = *Rhs.sou;
+    vert t = *Lhs.tar; vert rt = *Rhs.tar;
+    if (s != rs) {
+        return s < rs;
+    } else if (t != rt) {
+        return t < rt;
+    } else {
+        return Lhs.wei < Rhs.wei;
+    }
+}
+
 // ==== Graph printing ====
 template <
     class Weight_t
@@ -69,8 +83,11 @@ template <
         std::cout << "(" << V << ") " << *V << "\n";
     }
 
+    std::vector<edge<Weight_t>> edges (Graph.m_Edges.begin(), Graph.m_Edges.end());
+    std::sort(edges.begin(), edges.end(), custom_edge_less<Weight_t>);
+
     printf("%40s\n", "Edges");
-    for (auto Eit = Graph.m_Edges.begin(); Eit != Graph.m_Edges.end(); ++Eit) {
+    for (auto Eit = edges.begin(); Eit != edges.end(); ++Eit) {
         printf("source: %2d; target: %2d; [%d]\n", *(*Eit).sou, *(*Eit).tar, (*Eit).wei);
     }
     printf("%40s\n", "End");
