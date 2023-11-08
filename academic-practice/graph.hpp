@@ -241,22 +241,25 @@ struct residual_network : weighted_graph<Weight_t> // flow_network
 
     void update_capacity() noexcept {
         index_t countV = Mybase::m_Weightfunc.size();
-        const auto& M = Mybase::m_Weightfunc;
+        const auto& C = Mybase::m_Weightfunc; // main capacity function
+                                              // capacity on edges of main graph
 
-        for (index_t i = {0}; i < countV - 1; ++i) {
-            for (index_t j = {0}; j < countV; ++j) {
-                weight_type weight = M[i][j];
-                weight_type weight_reverse = M[j][i];
-                m_Capacity[i][j] = (weight != 0) * (weight - m_Flow[i][j]) + // i -> j
-                                   (weight_reverse != 0) * (m_Flow[j][i])  + // not i -> j, but j -> i
-                                    0;                                       // not i -> j, not j -> i
+        for (index_t u = {0}; u < countV; ++u) {
+            for (index_t v = {0}; v < countV; ++v) {
+                weight_type cuv = C[u][v]; // capacity on (u,v)
+                weight_type cvu = C[v][u]; // capacity on (v,u)
+
+                m_Capacity[u][v] = (cuv != 0) * (cuv - m_Flow[u][v]) + // u -> v
+                                   (cvu != 0) * (m_Flow[v][u]);        // not u -> v, but v -> u
+                                                                       // else not u -> v, not v -> u => = 0
+
                 // ^^^^ equivalent to vvvv
-                // if (weight) {
-                //     m_Capacity[i][j] = weight - m_Flow[i][j];
-                // } else if (weight_reverse) {
-                //     m_Capacity[i][j] = m_Flow[j][i];
-                // } else {
-                //     m_Capacity[i][j] = 0;
+                // if (cuv) {                                   // (u,v) \in E
+                //     m_Capacity[u][v] = cuv - m_Flow[u][v];
+                // } else if (cvu) {                            // (v,u) \in E
+                //     m_Capacity[u][v] = m_Flow[v][u];
+                // } else {                                     // other cases
+                //     m_Capacity[u][v] = 0;
                 // }
             }
         }
