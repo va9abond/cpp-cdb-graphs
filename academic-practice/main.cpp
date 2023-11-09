@@ -86,9 +86,9 @@ int main()
     // std::cout << pair.first << "\n";
     // msl::print(pair.second);
 
-    auto flow = generateMF<MF_Algo_t::basic_Ford_Fulkerson>(Graph, from, to);
+    auto flow = generateMF<MF_Algo_t::Edmonds_Karp>(Graph, from, to);
     std::cout << "==============================================\n";
-    std::cout << flow.first << "\n";
+    std::cout << "flow: " << flow.first << "\n";
     std::cout << "==============================================\n";
 
     // shortest_path_presentation<SP_Algo_t::Bellman_Ford>(net::Mybase);

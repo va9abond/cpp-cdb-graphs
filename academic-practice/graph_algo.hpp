@@ -218,7 +218,7 @@ inline void generateSP_print (const std::map<vertptr, std::pair<int, std::vector
 // ==== maximum flow problem algorithm type ====
 enum class MF_Algo_t
 {
-    basic_Ford_Fulkerson,
+    Edmonds_Karp, // Ford-Fulkerson + find path by bfs
 };
 
 template <
@@ -229,7 +229,7 @@ inline std::pair<int,std::vector<std::vector<int>>> generateMF ( // find maximum
 );
 
 template <>
-inline std::pair<int,std::vector<std::vector<int>>> generateMF<MF_Algo_t::basic_Ford_Fulkerson> (
+inline std::pair<int,std::vector<std::vector<int>>> generateMF<MF_Algo_t::Edmonds_Karp> (
     const weighted_graph<int>& Graph, const vert Source, const vert Target
 ) {
     using index_t = residual_network<int>::index_t;
@@ -247,15 +247,10 @@ inline std::pair<int,std::vector<std::vector<int>>> generateMF<MF_Algo_t::basic_
         for (index_t i = {0}; i < path.second.size() - 1; ++i) {
             vertptr s = path.second[i];
             vertptr t = path.second[i+1];
-            std::cout << "Rnet.m_Weightfunc[s][t]: " << Rnet.m_Weightfunc[*s][*t] << "\n";
             if (Rnet.m_Weightfunc[*s][*t]) {
-                std::cout << "Rnet.m_Flow[s][t] old: " << Rnet.m_Flow[*s][*t] << "\n";
                 Rnet.m_Flow[*s][*t] += path.first;
-                std::cout << "Rnet.m_Flow[s][t] new: " << Rnet.m_Flow[*s][*t] << "\n";
             } else {
-                std::cout << "Rnet.m_Flow[t][s] old: " << Rnet.m_Flow[*t][*s] << "\n";
                 Rnet.m_Flow[*t][*s] -= path.first;
-                std::cout << "Rnet.m_Flow[t][s] new: " << Rnet.m_Flow[*t][*s] << "\n";
             }
         }
         Rnet.update_capacity();
