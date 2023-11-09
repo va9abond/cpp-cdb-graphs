@@ -219,7 +219,7 @@ template <
 struct residual_network : weighted_graph<Weight_t> // flow_network
 {
     using Mybase      = weighted_graph<Weight_t>;
-    using weight_type = Weight_t;
+    using weight_type = typename Mybase::weight_type;
     using size_type   = typename Mybase::size_type;
     using vert        = typename Mybase::vert;
     using vertptr     = typename Mybase::vertptr;
@@ -232,48 +232,57 @@ struct residual_network : weighted_graph<Weight_t> // flow_network
     //            if there are (sou --> tar and tar --> sou) then
     //            tar --> sou converts to tar --> new_vert --> sou
     residual_network (const weighted_graph<weight_type>& Rhs) :
-        Mybase(Edges_parallelization(Rhs.m_Weightfunc)), // construct weighted_graph with new weight_funct
+        Mybase(parallelization(Rhs.m_Weightfunc)), // construct weighted_graph with new weight_funct
         m_Flow(Mybase::m_Weightfunc.size(), std::vector<int>(Mybase::m_Weightfunc.size(), 0)), // init flow as 0
         m_Capacity(Mybase::m_Weightfunc.size(), std::vector<int>(Mybase::m_Weightfunc.size(), 0)) // init capacity
     {
         update_capacity();
     }
 
-    void update_capacity() noexcept
-    {
+    void update_capacity() noexcept {
         index_t countV = Mybase::m_Weightfunc.size();
-        const auto& M = Mybase::m_Weightfunc;
+        const auto& C = Mybase::m_Weightfunc; // main capacity function
+                                              // capacity on edges of main graph
 
-        for (index_t i = {0}; i < countV - 1; ++i) {
-            for (index_t j = {0}; j < countV; ++j) {
-                weight_type weight = M[i][j];
-                weight_type weight_reverse = M[j][i];
-                m_Capacity[i][j] = (weight != 0) * (weight - m_Flow[i][j]) + // i -> j
-                                   (weight_reverse != 0) * (m_Flow[j][i])  + // not i -> j, but j -> i
-                                    0;                                       // not i -> j, not j -> i
+        for (index_t u = {0}; u < countV; ++u) {
+            for (index_t v = {0}; v < countV; ++v) {
+                weight_type cuv = C[u][v]; // capacity on (u,v)
+                weight_type cvu = C[v][u]; // capacity on (v,u)
+
+                // m_Capacity[u][v] = (cuv != 0) * (cuv - m_Flow[u][v]) + // u -> v
+                //                    (cvu != 0) * (m_Flow[v][u]);        // not u -> v, but v -> u
+                                                                       // else not u -> v, not v -> u => = 0
+
                 // ^^^^ equivalent to vvvv
-                // if (weight) {
-                //     m_Capacity[i][j] = weight - m_Flow[i][j];
-                // } else if (weight_reverse) {
-                //     m_Capacity[i][j] = m_Flow[j][i];
-                // } else {
-                //     m_Capacity[i][j] = 0;
-                // }
+                if (cuv) {                                   // (u,v) \in E
+                    m_Capacity[u][v] = cuv - m_Flow[u][v];
+                } else if (cvu) {                            // (v,u) \in E
+                    m_Capacity[u][v] = m_Flow[v][u];
+                } else {                                     // other cases
+                    m_Capacity[u][v] = 0;
+                }
             }
         }
     }
 
-    decltype(auto) find_path (vertptr Source, vertptr Target) noexcept
-    {
+    std::pair<weight_type, std::vector<vertptr>> find_path (vertptr Source, vertptr Target) noexcept {
         return bfs(Source, Target);
     }
 
 
+    weight_type flow (vert Source) {
+        weight_type flow = 0;
+        for (auto const& item : m_Flow[Source]) {
+            flow += item;
+        }
+
+        return flow;
+    }
+
 private:
-    std::vector<std::vector<int>> Edges_parallelization (const std::vector<std::vector<int>>& dvec) noexcept
-    {
+    std::vector<std::vector<int>> parallelization (const std::vector<std::vector<int>>& dvec) noexcept {
         index_t countV = dvec.size();
-        index_t last_index = countV - 1;
+        index_t new_size = countV;
         std::vector<std::vector<int>> Result(dvec);
 
         for (index_t i = {0}; i < countV - 1; ++i) {
@@ -283,24 +292,22 @@ private:
 
                 if (weight && weight_reverse) {                                  // sou -> tar AND tar -> sou
                     Result[j][i] = 0;                                            // destroy: tar -> sou
-                    Result.push_back(std::vector<weight_type>(++last_index, 0)); // create:  new vert with no connects
+                    Result.push_back(std::vector<weight_type>(++new_size, 0));   // create: vert(new_vert) with no connections
                     Result.back()[i] = weight_reverse;                           // create: new_vert -> sou
 
-                    for (index_t k = {0}; k < Result.size(); ++k) {
-                        Result[k].push_back(0);                                  // disconnect others witch new_vert
+                    for (index_t k = {0}; k < new_size-1; ++k) {                 // resizing vector to size+1
+                        Result[k].push_back(0);                                  // disconnect others with new_vert
                     }
-
-                    Result[j][last_index] = weight_reverse;                      // create:: tar->new_vert
+                    Result[j][new_size-1] = weight_reverse;                      // create: tar->new_vert
                 }
             }
         }
-        return Result;
+        return Result;                                                           // sou -> tar AND tar -> new_vert -> sou
     }
 
 #if 1
-    decltype(auto) bfs (vertptr Source, vertptr Target) noexcept
-    {
-        auto countV = Graph_base_::m_Verts.size();
+    std::pair<weight_type, std::vector<vertptr>> bfs (vertptr Source, vertptr Target) noexcept {
+        auto countV = Mybase::m_Verts.size();
         std::vector<vertptr> Parents(countV, nullptr);
         std::vector<bool>    Visited(countV, 0);
         bool                 is_find_path = false;
@@ -312,14 +319,14 @@ private:
 
         while (!is_find_path && !Queue.empty()) {
             vertptr Vnow = Queue.front();
-            Visited[*Vnow] = true;
 
             std::vector<vert> Nbrs = m_Capacity[*Vnow];
             for (index_t nbrNo = {0}; nbrNo < Nbrs.size(); ++nbrNo) {
                 weight_type ci = Nbrs[nbrNo]; // capacity
                 if (ci) { // capacity != 0
-                    Parents[nbrNo] = Vnow;
                     if (!Visited[nbrNo]) {
+                        Visited[nbrNo] = true;
+                        Parents[nbrNo] = Vnow;
                         if ((int)nbrNo == *Target) {
                             is_find_path = true; break;
                         } else {
@@ -331,32 +338,34 @@ private:
             Queue.pop();
         }
 
-        std::vector<vertptr> Path(0);
-        weight_type min_capacity = (is_find_path ? std::numeric_limits<weight_type>::max() : 0);
         if (is_find_path) {
+            std::vector<vertptr> Path(0);
+            weight_type min_capacity = (is_find_path ? std::numeric_limits<weight_type>::max() : 0);
+
             vertptr Vnow = Target;
 
             while (Vnow != nullptr) {
                 Path.push_back(Vnow);
                 vertptr Vparent = Parents[*Vnow];
-                // std::cout << "\n=======" << *Vparent;
                 if (Vparent) {
                     min_capacity = (min_capacity > m_Capacity[*Vparent][*Vnow] ? m_Capacity[*Vparent][*Vnow] : min_capacity);
-
                 }
-
                 Vnow = Vparent;
             }
             std::reverse(Path.begin(), Path.end());
+            return std::make_pair(min_capacity, Path);
+        } else {
+            return std::make_pair(0, std::vector<vertptr>(0, nullptr));
         }
-        return std::make_pair(min_capacity, Path);
     }
+
 #endif
 
 public:
     std::vector<std::vector<weight_type>> m_Flow;     // resulting flow
     std::vector<std::vector<weight_type>> m_Capacity; // residual capacity
 };
+
 
 // no weights on edges, just 1 if i, j verts connected, else 0
 struct general_graph : weighted_graph<bool> {};

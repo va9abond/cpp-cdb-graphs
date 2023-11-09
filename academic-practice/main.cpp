@@ -51,29 +51,55 @@ void DFS_presentation (const weighted_graph<int>& Graph)
     DFSprint(MST);
 }
 
+template <
+    MF_Algo_t algo_t
+>
+void generationMF_presentation (const weighted_graph<int>& Graph, vert Source, vert Target) {
+    std::cout << "Source: " << Source << "\n";
+    std::cout << "Targer: " << Target << "\n";
+
+    auto flow = generateMF<MF_Algo_t::Edmonds_Karp>(Graph, Source, Target);
+    std::cout << "==============================================\n";
+    std::cout << "flow: " << flow.first << "\n";
+    std::cout << "==============================================\n";
+}
+
 
 int main()
 {
     weighted_graph<int> Graph ("weight_func.txt");
     print(Graph);
 
-#if 0
+#if 1
     // task 3.1
-    std::cout << "\n==== task 3.1 ====";
+    std::cout << "\n==== task 3.1 ====\n";
     minimal_spanning_tree_presentation<MST_Algo_t::Kruskal>(Graph);
 
     // task 3.2
-    std::cout << "\n\n==== task 3.2 ====";
+    std::cout << "\n==== task 3.2 ====\n";
     DFS_presentation(Graph);
 
     // task 3.3
-    std::cout << "\n\n==== task 3.3 ====";
+    std::cout << "\n==== task 3.3 ====\n";
     shortest_path_presentation<SP_Algo_t::Bellman_Ford>(Graph);
 
+    // task 4.1
+    std::cout << "\n==== task 4.1 ====\n";
+    generationMF_presentation<MF_Algo_t::Edmonds_Karp>(Graph, 0, 11);
 #endif
 
     // residual_network<int> net(Graph);
     // print(net);
+
+
+
+    // vertptr from = net.m_Verts[0]; std::cout << "from: " << from << " " << *from << "\n";
+    // vertptr to = net.m_Verts[11];   std::cout << "to: " << to << " " << *to << "\n";
+    // auto pair = net.find_path(from, to);
+    //
+    // std::cout << pair.first << "\n";
+    // msl::print(pair.second);
+
 
     // shortest_path_presentation<SP_Algo_t::Bellman_Ford>(net::Mybase);
 

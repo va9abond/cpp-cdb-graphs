@@ -55,7 +55,21 @@ inline weighted_graph<int> generateMST<MST_Algo_t::Kruskal> (const weighted_grap
 }
 
 
-// printf "%-10s%-15s%-15s%s\n" "$PID" "$MEMORY" "$MEMPER" "$COMMAND"
+// ==== custom less for graph printing ====
+template <
+    class Weight_t
+> bool custom_edge_less (const edge<Weight_t>& Lhs, const edge<Weight_t>& Rhs) {
+    vert s = *Lhs.sou; vert rs = *Rhs.sou;
+    vert t = *Lhs.tar; vert rt = *Rhs.tar;
+    if (s != rs) {
+        return s < rs;
+    } else if (t != rt) {
+        return t < rt;
+    } else {
+        return Lhs.wei < Rhs.wei;
+    }
+}
+
 // ==== Graph printing ====
 template <
     class Weight_t
@@ -69,8 +83,11 @@ template <
         std::cout << "(" << V << ") " << *V << "\n";
     }
 
+    std::vector<edge<Weight_t>> edges (Graph.m_Edges.begin(), Graph.m_Edges.end());
+    std::sort(edges.begin(), edges.end(), custom_edge_less<Weight_t>);
+
     printf("%40s\n", "Edges");
-    for (auto Eit = Graph.m_Edges.begin(); Eit != Graph.m_Edges.end(); ++Eit) {
+    for (auto Eit = edges.begin(); Eit != edges.end(); ++Eit) {
         printf("source: %2d; target: %2d; [%d]\n", *(*Eit).sou, *(*Eit).tar, (*Eit).wei);
     }
     printf("%40s\n", "End");
@@ -182,8 +199,8 @@ inline std::map<vertptr, std::pair<int, std::vector<vert>>> generateSP<SP_Algo_t
     return general_res;
 }
 
-inline void generateSP_print (const std::map<vertptr, std::pair<int, std::vector<vert>>>& map, vertptr Source)
-{
+// It's awful(
+inline void generateSP_print (const std::map<vertptr, std::pair<int, std::vector<vert>>>& map, vertptr Source) {
     std::cout << "\n===== All Shortest Ways, source: " << *Source << " ====\n";
     printf("%-20s %s  path \n", "     target ", " dist. ");
     for (const auto& el : map) {
@@ -201,41 +218,46 @@ inline void generateSP_print (const std::map<vertptr, std::pair<int, std::vector
 // ==== maximum flow problem algorithm type ====
 enum class MF_Algo_t
 {
-    basic_Ford_Fulkerson,
+    Edmonds_Karp, // Ford-Fulkerson + find path by bfs
 };
 
 template <
     MF_Algo_t algo_t
 >
-inline std::vector<std::vector<int>> generateMF (
-    const weighted_graph<int>&, const vertptr, const vertptr
+inline std::pair<int,std::vector<std::vector<int>>> generateMF ( // find maximum flow from Source to Target
+    const weighted_graph<int>&, const vert, const vert
 );
 
 template <>
-inline std::vector<std::vector<int>> generateMF<MF_Algo_t::basic_Ford_Fulkerson> (
-    const weighted_graph<int>& Graph, const vertptr Source, const vertptr Target
+inline std::pair<int,std::vector<std::vector<int>>> generateMF<MF_Algo_t::Edmonds_Karp> (
+    const weighted_graph<int>& Graph, const vert Source, const vert Target
 ) {
     using index_t = residual_network<int>::index_t;
     // using wedge = weighted_graph<int>::wedge;
     // const int countV = Graph.sizeV();
 
-    residual_network<int> Rnetwork(Graph); // init residual network; now: zero flow
-    auto path = Rnetwork.find_path(Source, Target);
+    residual_network<int> Rnet(Graph); // init residual network; now: zero flow
+    auto ResultFlow (Rnet.m_Flow);     // init zero flow
 
+    auto path = Rnet.find_path(Rnet.m_Verts[Source], Rnet.m_Verts[Target]); // path = std::pait<A,B> where
+                                                    // A - c_f(p) - min residual capacity on path
+                                                    // if Path not exist, then A = 0
+                                                    // B - std::vector<vertptr> - augmenting path
     while (path.first) {
         for (index_t i = {0}; i < path.second.size() - 1; ++i) {
             vertptr s = path.second[i];
             vertptr t = path.second[i+1];
-            if (Rnetwork.m_Weightfunc[*s][*t]) {
-                Rnetwork.m_Flow[*s][*t] += path.first;
+            if (Rnet.m_Weightfunc[*s][*t]) {
+                Rnet.m_Flow[*s][*t] += path.first;
             } else {
-                Rnetwork.m_Flow[*t][*s] -= path.first;
+                Rnet.m_Flow[*t][*s] -= path.first;
             }
         }
-        Rnetwork.update_capacity();
-        path = Rnetwork.find_path(Source, Target);
+        Rnet.update_capacity();
+        path = Rnet.find_path(Rnet.m_Verts[Source], Rnet.m_Verts[Target]);
     }
-    return Rnetwork.m_Flow;
+
+    return std::make_pair(Rnet.flow(Source), Rnet.m_Flow);
 }
 
 
