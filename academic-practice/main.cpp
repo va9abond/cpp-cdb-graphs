@@ -73,7 +73,23 @@ int main()
 #endif
 
     residual_network<int> net(Graph);
-    print(net);
+    // print(net);
+
+    vert from = 0 ;std::cout << "from: " << from << "\n";
+    vert to = 11;   std::cout << "to: " << to << "\n";
+
+
+    // vertptr from = net.m_Verts[0]; std::cout << "from: " << from << " " << *from << "\n";
+    // vertptr to = net.m_Verts[11];   std::cout << "to: " << to << " " << *to << "\n";
+    // auto pair = net.find_path(from, to);
+    //
+    // std::cout << pair.first << "\n";
+    // msl::print(pair.second);
+
+    auto flow = generateMF<MF_Algo_t::basic_Ford_Fulkerson>(Graph, from, to);
+    std::cout << "==============================================\n";
+    std::cout << flow.first << "\n";
+    std::cout << "==============================================\n";
 
     // shortest_path_presentation<SP_Algo_t::Bellman_Ford>(net::Mybase);
 

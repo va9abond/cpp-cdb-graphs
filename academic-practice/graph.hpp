@@ -249,26 +249,35 @@ struct residual_network : weighted_graph<Weight_t> // flow_network
                 weight_type cuv = C[u][v]; // capacity on (u,v)
                 weight_type cvu = C[v][u]; // capacity on (v,u)
 
-                m_Capacity[u][v] = (cuv != 0) * (cuv - m_Flow[u][v]) + // u -> v
-                                   (cvu != 0) * (m_Flow[v][u]);        // not u -> v, but v -> u
+                // m_Capacity[u][v] = (cuv != 0) * (cuv - m_Flow[u][v]) + // u -> v
+                //                    (cvu != 0) * (m_Flow[v][u]);        // not u -> v, but v -> u
                                                                        // else not u -> v, not v -> u => = 0
 
                 // ^^^^ equivalent to vvvv
-                // if (cuv) {                                   // (u,v) \in E
-                //     m_Capacity[u][v] = cuv - m_Flow[u][v];
-                // } else if (cvu) {                            // (v,u) \in E
-                //     m_Capacity[u][v] = m_Flow[v][u];
-                // } else {                                     // other cases
-                //     m_Capacity[u][v] = 0;
-                // }
+                if (cuv) {                                   // (u,v) \in E
+                    m_Capacity[u][v] = cuv - m_Flow[u][v];
+                } else if (cvu) {                            // (v,u) \in E
+                    m_Capacity[u][v] = m_Flow[v][u];
+                } else {                                     // other cases
+                    m_Capacity[u][v] = 0;
+                }
             }
         }
     }
 
-    decltype(auto) find_path (vertptr Source, vertptr Target) noexcept {
+    std::pair<weight_type, std::vector<vertptr>> find_path (vertptr Source, vertptr Target) noexcept {
         return bfs(Source, Target);
     }
 
+
+    weight_type flow (vert Source) {
+        weight_type flow = 0;
+        for (auto const& item : m_Flow[Source]) {
+            flow += item;
+        }
+
+        return flow;
+    }
 
 private:
     std::vector<std::vector<int>> parallelization (const std::vector<std::vector<int>>& dvec) noexcept {
@@ -297,8 +306,10 @@ private:
     }
 
 #if 1
-    decltype(auto) bfs (vertptr Source, vertptr Target) noexcept {
-        auto countV = Graph_base_::m_Verts.size();
+    std::pair<weight_type, std::vector<vertptr>> bfs (vertptr Source, vertptr Target) noexcept {
+        std::cout << "========== Debug start ==========\n";
+        auto countV = Mybase::m_Verts.size();
+        std::cout << "countV: " << countV << "\n";
         std::vector<vertptr> Parents(countV, nullptr);
         std::vector<bool>    Visited(countV, 0);
         bool                 is_find_path = false;
@@ -310,14 +321,17 @@ private:
 
         while (!is_find_path && !Queue.empty()) {
             vertptr Vnow = Queue.front();
-            Visited[*Vnow] = true;
+            std::cout << "Vnow: " << Vnow << " " << *Vnow << "\n";
 
             std::vector<vert> Nbrs = m_Capacity[*Vnow];
+            std::cout << "nbrNum: " << Nbrs.size() << "\n";
             for (index_t nbrNo = {0}; nbrNo < Nbrs.size(); ++nbrNo) {
                 weight_type ci = Nbrs[nbrNo]; // capacity
                 if (ci) { // capacity != 0
-                    Parents[nbrNo] = Vnow;
+                    std::cout << "Nbr: " << Mybase::m_Verts[nbrNo] << " " << nbrNo << " ci: " << ci << " is vesited: " << Visited[nbrNo] << "\n";
                     if (!Visited[nbrNo]) {
+                        Visited[nbrNo] = true;
+                        Parents[nbrNo] = Vnow;
                         if ((int)nbrNo == *Target) {
                             is_find_path = true; break;
                         } else {
@@ -329,26 +343,43 @@ private:
             Queue.pop();
         }
 
-        std::vector<vertptr> Path(0);
-        weight_type min_capacity = (is_find_path ? std::numeric_limits<weight_type>::max() : 0);
+        std::cout << "PARENTS: {";
+        for (const auto& it : Parents) {
+            std::cout << (it == nullptr ? -1 : *it) << " ";
+        }
+        std::cout << "}\n";
+
         if (is_find_path) {
+            std::vector<vertptr> Path(0);
+            weight_type min_capacity = (is_find_path ? std::numeric_limits<weight_type>::max() : 0);
+
             vertptr Vnow = Target;
+            int STOP = 0;
 
             while (Vnow != nullptr) {
+                if (++STOP > 15) { std::cout << "HUI\n"; exit(1); }
                 Path.push_back(Vnow);
                 vertptr Vparent = Parents[*Vnow];
                 // std::cout << "\n=======" << *Vparent;
                 if (Vparent) {
                     min_capacity = (min_capacity > m_Capacity[*Vparent][*Vnow] ? m_Capacity[*Vparent][*Vnow] : min_capacity);
-
                 }
-
                 Vnow = Vparent;
             }
             std::reverse(Path.begin(), Path.end());
+            std::cout << "Path: {";
+            for (auto it = Path.begin(); it != Path.end(); ++it) {
+                std::cout << "(" << **it << ")" << *it << " ";
+            }
+            std::cout << "}\n";
+            std::cout << "========== Debug end ==========\n\n";
+            return std::make_pair(min_capacity, Path);
+        } else {
+            std::cout << "========== Debug end ==========\n";
+            return std::make_pair(0, std::vector<vertptr>(0, nullptr));
         }
-        return std::make_pair(min_capacity, Path);
     }
+
 #endif
 
 public:
