@@ -13,6 +13,7 @@
 namespace alias {
     template <class T> using v = std::vector<T>;
     template <class T> using vv = std::vector<std::vector<T>>;
+    template <class T> using index_t = typename std::vector<T>;
     using s_sz = std::string::size_type;
 }
 
@@ -68,7 +69,7 @@ inline std::string normalize_string (std::string str) {
 // file to double vector
 inline alias::vv<int> generate_2dvector_from_file (const std::string& file_name) {
     std::ifstream file (file_name, std::ios::in); // create an input stream to read from file
-    std::vector<std::vector<int>> result;
+    alias::vv<int> result;
 
     if (file.is_open()) {
         std::string line;
@@ -76,11 +77,51 @@ inline alias::vv<int> generate_2dvector_from_file (const std::string& file_name)
             std::vector<int> current_line_vector = str_to_vec(line);
             if (current_line_vector.size()) { result.push_back(current_line_vector); }
         }
+        result.shrink_to_fit();
     }
     file.close();
     return result;
 }
 
+template <class T>
+inline void resize_2dvector (alias::vv<T>& dvec, const unsigned new_size) {
+    using dvec_szt = typename alias::vv<T>::size_type;
+    using vec_szt = typename std::vector<T>::size_type;
+    dvec.resize( (dvec_szt)new_size, std::vector<T>(0,0));
+    for (auto& item : dvec) {
+        item.resize( (vec_szt)new_size, 0);
+    }
+}
+
+// function to process input (task 4.2);
+// generate ddvector to constract Bipartite graph
+inline alias::vv<int> generate_2dvector_from_file_4_2 (const std::string& file_name) {
+    std::ifstream file (file_name, std::ios::in);
+    alias::vv<int> result(100, std::vector<int>(100, 0));
+    auto size = result.size();
+
+    if (file.is_open()) {
+        std::string line;
+        unsigned lineNo = 0;   // there it means index of vertice from graph part A
+        unsigned max_index {0};
+        while (getline(file, line)) {
+            printf("\n*** %u ***", lineNo);
+            std::vector<int> nbrs = str_to_vec(line); // indexes of vetrices from graph part B,
+                                                      // which connected with vertice liniNo
+            for (const auto& nbr : nbrs) {
+                if (max_index > size) { resize_2dvector<int>(result, max_index+50); }
+                result[lineNo][(unsigned)nbr] = 1;
+                result[(unsigned)nbr][lineNo] = 1;
+                max_index = (max_index > (unsigned)nbr ? max_index : (unsigned)nbr);
+            }
+            ++lineNo;
+        }
+        printf("===%u===", max_index);
+        resize_2dvector(result, max_index+1);
+    }
+    file.close();
+    return result;
+}
 
 
 // addition of two 1-d vectors
