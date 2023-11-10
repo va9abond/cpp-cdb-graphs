@@ -215,7 +215,7 @@ inline void generateSP_print (const std::map<vertptr, std::pair<int, std::vector
 }
 
 
-// ==== maximum flow problem algorithm type ====
+// ==== maximum flow problem algorithm type (4.1) ====
 enum class MF_Algo_t
 {
     Edmonds_Karp, // Ford-Fulkerson + find path by bfs
@@ -261,8 +261,12 @@ inline std::pair<int,std::vector<std::vector<int>>> generateMF<MF_Algo_t::Edmond
 }
 
 
-// ==== maximum matching problem algorithm type ====
+// ==== maximum matching problem algorithm type (4.2) ====
 // based on maximum flow, but there are more algorithms: Hopcroft-Karp (p. 803)
+        // 1. devide by teams
+        // 2. construct extended graph EG
+        // 3. find max flow on EG
+
 inline std::pair<int,std::vector<std::vector<int>>> generateMM ( // find maximum matching
     const std::string& file_name
     ) {
@@ -281,13 +285,27 @@ inline std::pair<int,std::vector<std::vector<int>>> generateMM ( // find maximum
     bigraph.extension(teamB, -1);
 
     auto result = generateMF<MF_Algo_t::Edmonds_Karp>(bigraph, bigraph.sizeV()-1, bigraph.sizeV()-2);
-//     // 1. devide by teams
-//     // 2. construct extended graph EG
-//     // 3. find max flow on EG
-
-
     return result;
 }
 
+
+// ==== greedy coloring problem (4.3) ====
+inline std::vector<int> greedy_coloring (const weighted_graph<int>& Graph) {
+    auto sizeV = Graph.sizeV();
+    std::vector<int> colors(sizeV, -1); // vertptr V colored in color[V]
+
+    for (const vertptr vptr : Graph.m_Verts) {
+        auto nbrs = Graph.m_Weightfunc[*vptr];
+        int minColorNo = -1;
+        for (int inbr {0}; inbr < sizeV; ++inbr) {
+            if (nbrs[inbr]) {
+                minColorNo = (minColorNo >= colors[inbr] ? minColorNo : colors[inbr]);
+            }
+        }
+        colors[*vptr] = minColorNo + 1;
+    }
+
+    return colors;
+}
 
 #endif // GRAPHALGO_HPP
