@@ -84,12 +84,12 @@ inline alias::vv<int> generate_2dvector_from_file (const std::string& file_name)
 }
 
 template <class T>
-inline void resize_2dvector (alias::vv<T>& dvec, const unsigned new_size) {
+inline void resize_2dvector (alias::vv<T>& dvec, const unsigned new_size, T value) {
     using dvec_szt = typename alias::vv<T>::size_type;
     using vec_szt = typename std::vector<T>::size_type;
     dvec.resize( (dvec_szt)new_size, std::vector<T>(0,0));
     for (auto& item : dvec) {
-        item.resize( (vec_szt)new_size, 0);
+        item.resize( (vec_szt)new_size, value);
     }
 }
 
@@ -105,19 +105,17 @@ inline alias::vv<int> generate_2dvector_from_file_4_2 (const std::string& file_n
         unsigned lineNo = 0;   // there it means index of vertice from graph part A
         unsigned max_index {0};
         while (getline(file, line)) {
-            printf("\n*** %u ***", lineNo);
             std::vector<int> nbrs = str_to_vec(line); // indexes of vetrices from graph part B,
                                                       // which connected with vertice liniNo
             for (const auto& nbr : nbrs) {
-                if (max_index > size) { resize_2dvector<int>(result, max_index+50); }
+                if (max_index > size) { resize_2dvector<int>(result, max_index+50, 0); }
                 result[lineNo][(unsigned)nbr] = 1;
                 result[(unsigned)nbr][lineNo] = 1;
                 max_index = (max_index > (unsigned)nbr ? max_index : (unsigned)nbr);
             }
             ++lineNo;
         }
-        printf("===%u===", max_index);
-        resize_2dvector(result, max_index+1);
+        resize_2dvector(result, max_index+1, 0);
     }
     file.close();
     return result;
