@@ -308,4 +308,64 @@ inline std::vector<int> greedy_coloring (const weighted_graph<int>& Graph) {
     return colors;
 }
 
+
+// ==== hamiltonian loop problem ====
+inline bool is_safe (
+        const weighted_graph<int>& Graph,
+        const std::vector<int>& Path,
+        vert vto,
+        vert vfrom
+        ) {
+    if (Graph.m_Weightfunc[Path[vto-1]][vfrom] == 0) {
+        return false;
+    }
+
+    for (int i {0}; i < vto; ++i) {
+        if (Path[i] == vfrom) {
+            return false;
+        }
+    }
+    return true;
+}
+
+inline bool find_next_vert (
+        const weighted_graph<int>& Graph,
+        std::vector<int>& Path,
+        vert Pos
+        ) {
+
+    if (Pos == Graph.sizeV()) {
+        if (Graph.m_Weightfunc[Path[Pos-1]][Path[0]]) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    for (vert vrt = 1; vrt < Graph.sizeV(); ++vrt) {
+        if (is_safe(Graph, Path, Pos, vrt)) {
+            Path[Pos] = vrt;
+
+            if (find_next_vert(Graph, Path, Pos+1) == true) {
+                return true;
+            }
+            Path[Pos] = -1;
+        }
+    }
+    return false;
+}
+
+inline std::vector<int> generate_hamiltonian_loop (
+        const weighted_graph<int>& Graph
+        ) {
+    std::vector<int> Path(Graph.sizeV(), -1);
+
+    Path[0] = 0;
+    if (find_next_vert(Graph, Path, 1) == false) {
+        return {0,0};
+    }
+
+    return Path;
+}
+
 #endif // GRAPHALGO_HPP

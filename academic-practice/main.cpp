@@ -78,6 +78,14 @@ void greedy_coloring_presentation (const weighted_graph<int>& Graph) {
     std::cout << "==============================================\n";
 }
 
+void hml_presentation (const weighted_graph<int>& Graph) {
+    std::vector<int> path = generate_hamiltonian_loop(Graph);
+    std::cout << "==================== path ====================";
+    msl::print(path);
+    std::cout << "==============================================\n";
+}
+
+
 int main()
 {
     weighted_graph<int> Graph ("weight_func");
@@ -111,6 +119,10 @@ int main()
     // task 4.3
     std::cout << "\n==== task 4.3 ====\n";
     greedy_coloring_presentation(Graph);
+
+    // task 4.4
+    std::cout << "\n==== task 4.4 ====\n";
+    hml_presentation(Graph);
 #endif
 
     // vertptr vptr = BipartGraph.extension({0, 1,4,6}, -1);
