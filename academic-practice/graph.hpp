@@ -192,6 +192,24 @@ struct weighted_graph : Graph_base_ {
         return (int)m_Edges.size();
     }
 
+    // 1. if new vert nv is nullptr, this will create a new vert
+    // 2. insert in graph connecting it with other vertices, all weights = 1
+    vertptr extension (const std::vector<vert>& nbrs, const vert new_vert = -1) {
+        if ( new_vert != -1 && (unsigned)new_vert < m_Verts.size() ) { return nullptr; }
+
+        int index = (new_vert == -1 ? m_Verts.size() : new_vert);
+        m_Verts.push_back(new vert(index));
+
+        resize_2dvector(m_Weightfunc, m_Verts.size(), 0);
+        for (const vert& nbr : nbrs) {
+            m_Weightfunc[index][nbr] = 1;
+            m_Weightfunc[nbr][index] = 1;
+            m_Edges.emplace(m_Verts[index], m_Verts[nbr], 1);
+            m_Edges.emplace(m_Verts[nbr], m_Verts[index], 1);
+        }
+        return m_Verts.back();
+    }
+
 private:
     // construct edges by weight function
     void Construct_edges() noexcept {
