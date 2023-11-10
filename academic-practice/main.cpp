@@ -66,9 +66,17 @@ void generationMF_presentation (const weighted_graph<int>& Graph, vert Source, v
 
 void generationMM_presentation (const std::string& file_name) {
     auto maximum_matching = generateMM(file_name);
-    std::cout << maximum_matching.first << "\n";
+    std::cout << "==============================================\n";
+    std::cout << "maximum matching: " << maximum_matching.first << "\n";
+    std::cout << "==============================================\n";
 }
 
+void greedy_coloring_presentation (const weighted_graph<int>& Graph) {
+    std::vector<int> colors = greedy_coloring(Graph);
+    std::cout << "=================== colors ===================";
+    msl::print(colors);
+    std::cout << "==============================================\n";
+}
 
 int main()
 {
@@ -99,8 +107,11 @@ int main()
     // task 4.2
     std::cout << "\n==== task 4.2 ====\n";
     generationMM_presentation("matching");
-#endif
 
+    // task 4.3
+    std::cout << "\n==== task 4.3 ====\n";
+    greedy_coloring_presentation(Graph);
+#endif
 
     // vertptr vptr = BipartGraph.extension({0, 1,4,6}, -1);
     // std::cout << "new vert: " << vptr;
