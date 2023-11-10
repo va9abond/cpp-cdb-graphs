@@ -194,6 +194,7 @@ struct weighted_graph : Graph_base_ {
 
     // 1. if new vert nv is nullptr, this will create a new vert
     // 2. insert in graph connecting it with other vertices, all weights = 1
+    // TODO: it's better to use std::set<vert>& nbrs
     vertptr extension (const std::vector<vert>& nbrs, const vert new_vert = -1) {
         if ( new_vert != -1 && (unsigned)new_vert < m_Verts.size() ) { return nullptr; }
 

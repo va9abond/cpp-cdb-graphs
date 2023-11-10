@@ -261,6 +261,33 @@ inline std::pair<int,std::vector<std::vector<int>>> generateMF<MF_Algo_t::Edmond
 }
 
 
+// ==== maximum matching problem algorithm type ====
+// based on maximum flow, but there are more algorithms: Hopcroft-Karp (p. 803)
+inline std::pair<int,std::vector<std::vector<int>>> generateMM ( // find maximum matching
+    const std::string& file_name
+    ) {
+    auto a = generate_2dvector_from_file_4_2(file_name);
+    weighted_graph<int> bigraph (a.first);
+    std::vector<vert> teamA { a.second };
+
+    int border_index = teamA.size() - 1; // last index of teamA
+                                         // all verts, which > index in team B
+    std::vector<vert> teamB;
+    for (int i {border_index}; i < bigraph.sizeV(); ++i) {
+        teamB.push_back(i);
+    }
+
+    bigraph.extension(teamA, -1);
+    bigraph.extension(teamB, -1);
+
+    auto result = generateMF<MF_Algo_t::Edmonds_Karp>(bigraph, bigraph.sizeV()-1, bigraph.sizeV()-2);
+//     // 1. devide by teams
+//     // 2. construct extended graph EG
+//     // 3. find max flow on EG
+
+
+    return result;
+}
 
 
 #endif // GRAPHALGO_HPP

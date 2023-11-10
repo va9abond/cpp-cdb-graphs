@@ -95,9 +95,13 @@ inline void resize_2dvector (alias::vv<T>& dvec, const unsigned new_size, T valu
 
 // function to process input (task 4.2);
 // generate ddvector to constract Bipartite graph
-inline alias::vv<int> generate_2dvector_from_file_4_2 (const std::string& file_name) {
+// return weight matrix + indexes one of the team
+inline std::pair<alias::vv<int>, alias::v<int>> generate_2dvector_from_file_4_2 (
+        const std::string& file_name
+        ) {
     std::ifstream file (file_name, std::ios::in);
     alias::vv<int> result(100, std::vector<int>(100, 0));
+    alias::v<int> graph_part;
     auto size = result.size();
 
     if (file.is_open()) {
@@ -105,6 +109,7 @@ inline alias::vv<int> generate_2dvector_from_file_4_2 (const std::string& file_n
         unsigned lineNo = 0;   // there it means index of vertice from graph part A
         unsigned max_index {0};
         while (getline(file, line)) {
+            graph_part.push_back(lineNo);
             std::vector<int> nbrs = str_to_vec(line); // indexes of vetrices from graph part B,
                                                       // which connected with vertice liniNo
             for (const auto& nbr : nbrs) {
@@ -118,7 +123,7 @@ inline alias::vv<int> generate_2dvector_from_file_4_2 (const std::string& file_n
         resize_2dvector(result, max_index+1, 0);
     }
     file.close();
-    return result;
+    return std::make_pair(result,graph_part);
 }
 
 

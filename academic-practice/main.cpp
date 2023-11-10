@@ -64,13 +64,22 @@ void generationMF_presentation (const weighted_graph<int>& Graph, vert Source, v
     std::cout << "==============================================\n";
 }
 
+void generationMM_presentation (const std::string& file_name) {
+    auto maximum_matching = generateMM(file_name);
+    std::cout << maximum_matching.first << "\n";
+}
+
 
 int main()
 {
-    weighted_graph<int> Graph ("weight_func.txt");
-    print(Graph);
+    weighted_graph<int> Graph ("weight_func");
+    // print(Graph);
 
-#if 1
+    // weighted_graph<int> BipartGraph ("matching_converted");
+
+    // print(generateMM("matching"));
+
+#if 0
     // task 3.1
     std::cout << "\n==== task 3.1 ====\n";
     minimal_spanning_tree_presentation<MST_Algo_t::Kruskal>(Graph);
@@ -86,11 +95,26 @@ int main()
     // task 4.1
     std::cout << "\n==== task 4.1 ====\n";
     generationMF_presentation<MF_Algo_t::Edmonds_Karp>(Graph, 0, 11);
+
+    // task 4.2
+    std::cout << "\n==== task 4.2 ====\n";
+    generationMM_presentation("matching");
 #endif
+
+
+    // vertptr vptr = BipartGraph.extension({0, 1,4,6}, -1);
+    // std::cout << "new vert: " << vptr;
+    // print(BipartGraph);
+    // std::cout << "\n==== task 4.2 ====\n";
+    // generationMF_presentation<MF_Algo_t::Edmonds_Karp>(BipartGraph, 0, 6);
 
     // residual_network<int> net(Graph);
     // print(net);
 
+    // auto res = generate_2dvector_from_file_4_2("matching");
+    // for (const auto& item : res) {
+    //     msl::print(item);
+    // }
 
 
     // vertptr from = net.m_Verts[0]; std::cout << "from: " << from << " " << *from << "\n";
